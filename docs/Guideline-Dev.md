@@ -13,7 +13,7 @@
 
 | Phase | สถานะ | วันที่เริ่ม | วันที่เสร็จ |
 |-------|--------|-----------|-----------|
-| Phase 0: Design & Setup | 🔄 | 2026-05-04 | - |
+| Phase 0: Design & Setup | ✅ | 2026-05-04 | 2026-05-04 |
 | Phase 1: Foundation | ⬜ | - | - |
 | Phase 2: Transaction CRUD | ⬜ | - | - |
 | Phase 3: AI Integration | ⬜ | - | - |
@@ -61,8 +61,7 @@ Setup            (โครงบ้าน)       CRUD (ห้องแรก)  
 ⬜ 0.4  สร้าง ER Diagram (dbdiagram.io → export PNG + DBML)
 ⬜ 0.5  เขียน ADR-001: Tech Stack Decision
 ✅ 0.6  สร้าง GitHub repo "finlytic" (monorepo)
-🔄 0.7  Setup: .gitignore, .editorconfig, README skeleton, branch protection
-        ✅ .gitignore, .editorconfig, README skeleton — ⬜ branch protection (ทำมือบน GitHub)
+✅ 0.7  Setup: .gitignore, .editorconfig, README skeleton, branch protection
 ⬜ 0.8  ออกแบบ UI ใน Claude Design (ทุกหน้า)
         - Login / Register
         - Dashboard
