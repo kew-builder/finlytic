@@ -13,7 +13,7 @@
 
 | Phase | สถานะ | วันที่เริ่ม | วันที่เสร็จ |
 |-------|--------|-----------|-----------|
-| Phase 0: Design & Setup | ✅ | 2026-05-04 | 2026-05-04 |
+| Phase 0: Design & Setup | 🔄 | 2026-05-04 | - |
 | Phase 1: Foundation | ⬜ | - | - |
 | Phase 2: Transaction CRUD | ⬜ | - | - |
 | Phase 3: AI Integration | ⬜ | - | - |
