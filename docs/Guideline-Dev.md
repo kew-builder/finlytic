@@ -14,7 +14,7 @@
 | Phase | สถานะ | วันที่เริ่ม | วันที่เสร็จ |
 |-------|--------|-----------|-----------|
 | Phase 0: Design & Setup | ✅ | 2026-05-04 | 2026-05-04 |
-| Phase 1: Foundation | ⬜ | - | - |
+| Phase 1: Foundation | ✅ | 2026-05-04 | 2026-05-04 |
 | Phase 2: Transaction CRUD | ⬜ | - | - |
 | Phase 3: AI Integration | ⬜ | - | - |
 | Phase 4: Dashboard | ⬜ | - | - |
@@ -95,31 +95,31 @@ Setup            (โครงบ้าน)       CRUD (ห้องแรก)  
 
 **Backend:**
 ```
-⬜ 1.1  สร้าง .NET 8 Web API project (apps/api/)
-⬜ 1.2  Setup folder structure (Api / Application / Domain / Infrastructure)
-⬜ 1.3  Setup EF Core + PostgreSQL connection
-⬜ 1.4  สร้าง User entity + first migration
-⬜ 1.5  Setup Serilog (structured logging)
-⬜ 1.6  Health check endpoint (/health)
-⬜ 1.7  Swagger UI
-⬜ 1.8  Register endpoint (email + password → BCrypt hash → save)
-⬜ 1.9  Login endpoint (email + password → return JWT + refresh token)
-⬜ 1.10 JWT middleware (validate token on protected routes)
-⬜ 1.11 Refresh token endpoint
+✅ 1.1  สร้าง .NET 8 Web API project (apps/api/)
+✅ 1.2  Setup folder structure (Api / Application / Domain / Infrastructure)
+✅ 1.3  Setup EF Core + PostgreSQL connection
+✅ 1.4  สร้าง User entity + first migration
+✅ 1.5  Setup Serilog (structured logging)
+✅ 1.6  Health check endpoint (/health)
+✅ 1.7  Swagger UI
+✅ 1.8  Register endpoint (email + password → BCrypt hash → save)
+✅ 1.9  Login endpoint (email + password → return JWT + refresh token)
+✅ 1.10 JWT middleware (validate token on protected routes)
+✅ 1.11 Refresh token endpoint
 ```
 
 **Frontend:**
 ```
-⬜ 1.12 สร้าง Angular 17+ project (apps/web/)
-⬜ 1.13 Setup TailwindCSS
-⬜ 1.14 Routing setup (login, register, dashboard)
-⬜ 1.15 Auth service (login, register, store JWT, auto-refresh)
-⬜ 1.16 HTTP interceptor (attach JWT to every request)
-⬜ 1.17 Auth guard (redirect to login if not authenticated)
-⬜ 1.18 Layout component (header + sidebar + main content)
-⬜ 1.19 Login page (connect to API)
-⬜ 1.20 Register page (connect to API)
-⬜ 1.21 Dashboard page (empty shell — "Welcome, [name]")
+✅ 1.12 สร้าง Angular 19 project (apps/web/)
+✅ 1.13 Setup TailwindCSS
+✅ 1.14 Routing setup (login, register, dashboard)
+✅ 1.15 Auth service (login, register, store JWT, auto-refresh)
+✅ 1.16 HTTP interceptor (attach JWT to every request)
+✅ 1.17 Auth guard (redirect to login if not authenticated)
+⬜ 1.18 Layout component (header + sidebar + main content) — เลื่อนไป Phase 4
+✅ 1.19 Login page (connect to API)
+✅ 1.20 Register page (connect to API)
+✅ 1.21 Dashboard page (empty shell — "Welcome, [name]")
 ```
 
 ### Definition of Done
