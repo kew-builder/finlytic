@@ -8,6 +8,9 @@ public sealed class User
     public string Name { get; private set; } = string.Empty;
     public DateTime CreatedAt { get; private set; }
 
+    private readonly List<RefreshToken> _refreshTokens = [];
+    public IReadOnlyList<RefreshToken> RefreshTokens => _refreshTokens.AsReadOnly();
+
     private User() { }
 
     public static User Create(string email, string passwordHash, string name) => new()
