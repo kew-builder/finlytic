@@ -3,7 +3,14 @@ import { inject } from '@angular/core';
 import { switchMap, catchError, throwError } from 'rxjs';
 import { AuthService } from '../auth/auth.service';
 
+const AUTH_ENDPOINTS = ['/auth/login', '/auth/register', '/auth/dev-login', '/auth/refresh'];
+
 export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, next: HttpHandlerFn) => {
+  // Public endpoints — pass through without touching tokens
+  if (AUTH_ENDPOINTS.some(e => req.url.includes(e))) {
+    return next(req);
+  }
+
   const auth = inject(AuthService);
   const token = auth.accessToken();
 
