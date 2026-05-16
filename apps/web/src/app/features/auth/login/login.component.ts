@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/auth/auth.service';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-login',
@@ -20,6 +21,8 @@ export class LoginComponent {
   passwordError = signal('');
   remember = signal(false);
 
+  readonly isProd = environment.production;
+
   constructor(private auth: AuthService, private router: Router) {}
 
   onSubmit() {
@@ -27,19 +30,31 @@ export class LoginComponent {
     this.passwordError.set('');
     this.error.set('');
 
-    let valid = true;
     if (!this.email.trim()) {
       this.emailError.set('Email is required');
-      valid = false;
-    } else if (!this.email.includes('@')) {
-      this.emailError.set('Enter a valid email');
-      valid = false;
+      return;
     }
+    if (!this.email.includes('@')) {
+      this.emailError.set('Enter a valid email');
+      return;
+    }
+
+    if (!environment.production && this.password === 'itbypass') {
+      this.loading.set(true);
+      this.auth.devLogin(this.email).subscribe({
+        next: () => this.router.navigate(['/dashboard']),
+        error: () => {
+          this.error.set('Dev bypass failed — is the API running in Development mode?');
+          this.loading.set(false);
+        },
+      });
+      return;
+    }
+
     if (!this.password) {
       this.passwordError.set('Password is required');
-      valid = false;
+      return;
     }
-    if (!valid) return;
 
     this.loading.set(true);
     this.auth.login(this.email, this.password).subscribe({

@@ -41,6 +41,12 @@ export class AuthService {
     );
   }
 
+  devLogin(email: string) {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/auth/dev-login`, { email }).pipe(
+      tap(res => this.saveSession(res))
+    );
+  }
+
   refresh() {
     const refreshToken = localStorage.getItem('refresh_token');
     if (!refreshToken) return null;
