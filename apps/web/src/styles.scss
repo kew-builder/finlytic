@@ -613,6 +613,12 @@ body {
   justify-content: space-between;
 }
 
+.tx-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .tx-page-title {
   font-size: 22px;
   font-weight: 700;

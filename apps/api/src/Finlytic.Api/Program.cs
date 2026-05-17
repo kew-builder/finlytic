@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json.Serialization;
 using Finlytic.Application.Common.Interfaces;
 using Finlytic.Application.Common.Validators;
 using FluentValidation;
@@ -36,6 +37,8 @@ var jwtSecret = builder.Configuration["Jwt:Secret"]!;
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
+        // Keep JWT claim names as-is (e.g. "sub") instead of mapping to WS-Fed URIs
+        options.MapInboundClaims = false;
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
@@ -56,7 +59,9 @@ builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 builder.Services.AddScoped<ITransactionService, TransactionService>();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateTransactionRequestValidator>();
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(opt =>
+        opt.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
 builder.Services.AddCors(options =>
     options.AddPolicy("Dev", policy => policy
@@ -81,3 +86,5 @@ app.MapHealthChecks("/health");
 app.MapControllers();
 
 app.Run();
+
+public partial class Program { }

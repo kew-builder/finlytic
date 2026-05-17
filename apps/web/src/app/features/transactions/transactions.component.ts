@@ -18,17 +18,17 @@ import {
 
       <!-- Page header -->
       <div class="tx-page-header">
-        <div>
-          <h1 class="tx-page-title">Transactions</h1>
-          <p class="tx-page-sub">บันทึกรายรับ-รายจ่ายของคุณ</p>
+        <h1 class="tx-page-title">Transactions</h1>
+        <div class="tx-header-actions">
+          <button class="btn-ghost" disabled style="opacity:0.5;cursor:not-allowed">📄 Import CSV</button>
+          <button class="btn-primary" (click)="openAdd()">＋ Add Transaction</button>
         </div>
-        <button class="btn-primary" (click)="openAdd()">＋ Add Transaction</button>
       </div>
 
       <!-- Summary bar -->
       @if (!loading() && transactions().length > 0) {
         <div class="summary-bar card">
-          <span class="summary-label">This period</span>
+          <span class="summary-label">{{ currentPeriodLabel }}</span>
           <div class="summary-divider"></div>
           <span class="summary-item">Income
             <span class="summary-val income">+{{ formatAmount(totalIncome()) }}</span>
@@ -169,13 +169,13 @@ import {
               </div>
               <div class="pagination-btns">
                 <button class="page-btn page-nav" [disabled]="page() <= 1"
-                  (click)="page.update(p => p - 1)">‹ Prev</button>
+                  (click)="prevPage()">‹ Prev</button>
                 @for (p of pageNumbers(); track p) {
                   <button class="page-btn" [class.active]="page() === p"
                     (click)="page.set(p)">{{ p }}</button>
                 }
                 <button class="page-btn page-nav" [disabled]="page() >= totalPages()"
-                  (click)="page.update(p => p + 1)">Next ›</button>
+                  (click)="nextPage()">Next ›</button>
               </div>
             </div>
           }
@@ -296,6 +296,7 @@ import {
 export class TransactionsComponent implements OnInit {
   private svc = inject(TransactionService);
 
+  readonly currentPeriodLabel = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   readonly categories = DEFAULT_CATEGORIES;
   readonly typeOptions = [
     { value: '',        label: 'All' },
@@ -503,18 +504,21 @@ export class TransactionsComponent implements OnInit {
     });
   }
 
+  prevPage(): void { this.page.update(p => p - 1); }
+  nextPage(): void { this.page.update(p => p + 1); }
+
   getCategoryMeta(name: string | null): CategoryMeta {
     return this.categories.find(c => c.name === name)
       ?? { name: name ?? '', emoji: '📌', bg: 'rgba(148,163,184,0.12)' };
   }
 
   formatDate(d: string): string {
-    return new Date(d + 'T00:00:00').toLocaleDateString('th-TH', {
-      day: 'numeric', month: 'short', year: 'numeric',
+    return new Date(d + 'T00:00:00').toLocaleDateString('en-US', {
+      day: 'numeric', month: 'short',
     });
   }
 
   formatAmount(n: number): string {
-    return `฿${n.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+    return `฿${n.toLocaleString('en-US', { maximumFractionDigits: 2 })}`;
   }
 }
