@@ -129,17 +129,7 @@ import {
                       </div>
                     </div>
                   </td>
-                  <td class="tx-td-muted">
-                    @if (tx.categoryName) {
-                      <span class="tx-cat-badge"
-                        [style.background]="getCategoryMeta(tx.categoryName).bg"
-                        [style.color]="tx.categoryColor ?? 'inherit'">
-                        {{ tx.categoryName }}
-                      </span>
-                    } @else {
-                      <span class="tx-td-muted">—</span>
-                    }
-                  </td>
+                  <td class="tx-td-muted" style="font-size:13px">{{ tx.categoryName || '—' }}</td>
                   <td>
                     <span class="tx-type-badge"
                       [class.badge-income]="tx.type === 'Income'"
@@ -152,9 +142,11 @@ import {
                       {{ tx.type === 'Income' ? '+' : '-' }}{{ formatAmount(tx.amount) }}
                     </span>
                   </td>
-                  <td class="tx-td-actions">
-                    <button class="btn-icon" (click)="openEdit(tx)" title="Edit">✎</button>
-                    <button class="btn-icon btn-icon-danger" (click)="openDelete(tx)" title="Delete">🗑</button>
+                  <td>
+                    <div class="row-actions">
+                      <button class="row-action-btn" (click)="openEdit(tx)" title="Edit">✎</button>
+                      <button class="row-action-btn danger" (click)="openDelete(tx)" title="Delete">🗑</button>
+                    </div>
                   </td>
                 </tr>
               }
@@ -228,23 +220,21 @@ import {
                   [(ngModel)]="fDescription" placeholder="e.g. Lunch at MK Restaurant, Monthly Salary…" />
               </div>
 
-              <div class="form-row">
-                <!-- Date -->
-                <div class="form-group">
-                  <label class="form-label">Date *</label>
-                  <input class="form-input" type="date" [(ngModel)]="fDate" />
-                </div>
+              <!-- Category -->
+              <div class="form-group">
+                <label class="form-label">Category</label>
+                <select class="form-input" [(ngModel)]="fCategory">
+                  <option value="">Select category…</option>
+                  @for (c of categories; track c.name) {
+                    <option [value]="c.name">{{ c.emoji }} {{ c.name }}</option>
+                  }
+                </select>
+              </div>
 
-                <!-- Category -->
-                <div class="form-group">
-                  <label class="form-label">Category</label>
-                  <select class="form-input" [(ngModel)]="fCategory">
-                    <option value="">Select category…</option>
-                    @for (c of categories; track c.name) {
-                      <option [value]="c.name">{{ c.emoji }} {{ c.name }}</option>
-                    }
-                  </select>
-                </div>
+              <!-- Date -->
+              <div class="form-group">
+                <label class="form-label">Date *</label>
+                <input class="form-input" type="date" [(ngModel)]="fDate" />
               </div>
 
               <!-- Note -->
