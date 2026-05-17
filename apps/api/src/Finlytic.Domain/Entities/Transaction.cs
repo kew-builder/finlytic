@@ -21,10 +21,13 @@ public sealed class Transaction
 
     private Transaction() { }
 
-    public static Transaction Create(Guid userId, decimal amount, TransactionType type, DateOnly transactionDate, string? description = null) => new()
+    public static Transaction Create(
+        Guid userId, decimal amount, TransactionType type,
+        DateOnly transactionDate, string? description = null, Guid? categoryId = null) => new()
     {
         Id = Guid.NewGuid(),
         UserId = userId,
+        CategoryId = categoryId,
         Amount = amount,
         Type = type,
         Description = description,
@@ -34,12 +37,14 @@ public sealed class Transaction
         UpdatedAt = DateTime.UtcNow
     };
 
-    public void Update(decimal amount, TransactionType type, DateOnly transactionDate, string? description = null)
+    public void Update(decimal amount, TransactionType type, DateOnly transactionDate,
+        string? description = null, Guid? categoryId = null)
     {
         Amount = amount;
         Type = type;
         Description = description;
         TransactionDate = transactionDate;
+        CategoryId = categoryId;
         UpdatedAt = DateTime.UtcNow;
     }
 
