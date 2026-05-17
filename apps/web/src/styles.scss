@@ -915,6 +915,270 @@ body {
   color: oklch(62% 0.22 25);
 }
 
+// ── Transaction UI enhancements ─────────────────────────────────────────────
+
+.summary-bar {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 14px 20px;
+  flex-wrap: wrap;
+  font-size: 13.5px;
+  font-weight: 500;
+}
+.summary-label {
+  color: var(--muted);
+  font-size: 12.5px;
+}
+.summary-divider {
+  width: 1px;
+  height: 16px;
+  background: var(--border-hi);
+  flex-shrink: 0;
+}
+.summary-item { display: flex; align-items: center; gap: 6px; color: var(--muted); }
+.summary-val {
+  font-weight: 700;
+  font-size: 15px;
+  &.income { color: var(--teal); }
+  &.expense { color: var(--coral); }
+}
+
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.filter-to { font-size: 12px; color: var(--muted); flex-shrink: 0; }
+.filter-input {
+  height: 36px;
+  padding: 0 10px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s;
+  &:focus { border-color: var(--violet); }
+  &::placeholder { color: var(--muted); }
+  option { background: #13132a; }
+}
+.filter-search { flex: 1; min-width: 140px; }
+
+.toggle-group {
+  display: flex;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.toggle-opt {
+  padding: 0 14px;
+  height: 36px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  border-right: 1px solid var(--border);
+  &:last-child { border-right: none; }
+  &:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+  &.active {
+    color: var(--violet);
+    background: oklch(65% 0.25 280 / 0.15);
+  }
+}
+
+.tx-desc-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.cat-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+.tx-desc-text {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.tx-desc-main { font-weight: 500; font-size: 13.5px; }
+.badge-ai {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: oklch(65% 0.25 280 / 0.15);
+  color: var(--violet);
+  letter-spacing: 0.5px;
+}
+
+.badge-income {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  background: oklch(65% 0.18 175 / 0.15);
+  color: var(--teal);
+}
+.badge-expense {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  background: oklch(62% 0.22 25 / 0.12);
+  color: var(--coral);
+}
+
+.amount-pos { color: var(--teal); font-weight: 600; }
+.amount-neg { color: var(--coral); font-weight: 600; }
+
+.pagination-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.pagination-info { font-size: 12.5px; color: var(--muted); }
+.pagination-btns { display: flex; align-items: center; gap: 4px; }
+.page-btn {
+  height: 32px;
+  min-width: 32px;
+  padding: 0 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  font-family: 'Outfit', sans-serif;
+  font-size: 12.5px;
+  cursor: pointer;
+  transition: all 0.15s;
+  &:hover:not(:disabled) { color: var(--text); background: rgba(255,255,255,0.06); }
+  &.active { background: oklch(65% 0.25 280 / 0.2); color: var(--violet); border-color: oklch(65% 0.25 280 / 0.4); }
+  &:disabled { opacity: 0.35; cursor: default; }
+}
+.page-nav { font-size: 13px; }
+
+.type-toggle {
+  display: flex;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.type-btn {
+  flex: 1;
+  padding: 10px 0;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-family: 'Outfit', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  &:first-child { border-right: 1px solid var(--border); }
+  &.active-expense { background: oklch(62% 0.22 25 / 0.15); color: var(--coral); }
+  &.active-income  { background: oklch(65% 0.18 175 / 0.15); color: var(--teal); }
+}
+
+.amount-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 6px 16px;
+  transition: border-color 0.15s;
+  &:focus-within { border-color: var(--violet); }
+  &.income { border-color: oklch(65% 0.18 175 / 0.5); }
+  &.expense { border-color: oklch(62% 0.22 25 / 0.4); }
+
+  .amount-prefix {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+  input {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    font-family: 'Outfit', sans-serif;
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: var(--text);
+    width: 100%;
+    &::placeholder { color: rgba(232,232,240,0.2); }
+  }
+  &.income input { color: var(--teal); }
+  &.expense input { color: var(--coral); }
+}
+
+.form-label-opt {
+  font-weight: 400;
+  font-size: 11.5px;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--muted);
+}
+.form-textarea {
+  height: auto;
+  padding: 10px 12px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.modal-sm { max-width: 380px !important; }
+.confirm-text {
+  font-size: 13.5px;
+  color: var(--text);
+  line-height: 1.6;
+  strong { font-weight: 600; }
+}
+.btn-danger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 18px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: var(--coral);
+  color: #fff;
+  font-family: 'Outfit', sans-serif;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 0.15s;
+  &:hover { filter: brightness(1.1); }
+}
+
 // ── Floating decorative shapes ───────────────────────────────────────────────
 
 @keyframes floatShape {
