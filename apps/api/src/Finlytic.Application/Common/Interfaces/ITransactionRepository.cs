@@ -1,3 +1,4 @@
+using Finlytic.Application.Common.DTOs.Transactions;
 using Finlytic.Domain.Entities;
 using Finlytic.Domain.Enums;
 
@@ -6,7 +7,7 @@ namespace Finlytic.Application.Common.Interfaces;
 public interface ITransactionRepository
 {
     Task<Transaction?> GetByIdAsync(Guid id, Guid userId, CancellationToken ct = default);
-    Task<IReadOnlyList<Transaction>> GetByUserAsync(
+    Task<IReadOnlyList<TransactionResponse>> GetByUserAsync(
         Guid userId,
         DateOnly? startDate = null,
         DateOnly? endDate = null,

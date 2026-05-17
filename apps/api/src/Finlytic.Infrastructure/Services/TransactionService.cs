@@ -14,12 +14,9 @@ public sealed class TransactionService(ITransactionRepository repo) : ITransacti
         return MapToResponse(tx);
     }
 
-    public async Task<IReadOnlyList<TransactionResponse>> GetByUserAsync(
-        Guid userId, DateOnly? startDate, DateOnly? endDate, TransactionType? type, CancellationToken ct)
-    {
-        var transactions = await repo.GetByUserAsync(userId, startDate, endDate, type, ct);
-        return transactions.Select(MapToResponse).ToList();
-    }
+    public Task<IReadOnlyList<TransactionResponse>> GetByUserAsync(
+        Guid userId, DateOnly? startDate, DateOnly? endDate, TransactionType? type, CancellationToken ct) =>
+        repo.GetByUserAsync(userId, startDate, endDate, type, ct);
 
     public async Task<TransactionResponse> CreateAsync(Guid userId, CreateTransactionRequest request, CancellationToken ct)
     {
