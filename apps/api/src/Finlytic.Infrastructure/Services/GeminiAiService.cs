@@ -21,6 +21,7 @@ public sealed class GeminiAiService : IAiService
     private readonly ILogger<GeminiAiService> _logger;
     private readonly GeminiOptions _options;
     private readonly string _categorizePrompt;
+    private readonly string _categorizeBatchPrompt;
     private readonly string _insightsPrompt;
 
     private static readonly JsonSerializerOptions JsonOpts = new() { PropertyNameCaseInsensitive = true };
@@ -36,6 +37,7 @@ public sealed class GeminiAiService : IAiService
         _logger = logger;
         _options = options.Value;
         _categorizePrompt = LoadPrompt("categorize-v1.txt");
+        _categorizeBatchPrompt = LoadPrompt("categorize-batch-v1.txt");
         _insightsPrompt = LoadPrompt("insights-v1.txt");
     }
 
@@ -74,6 +76,46 @@ public sealed class GeminiAiService : IAiService
         {
             _logger.LogWarning(ex, "Failed to parse categorization response. Raw: {Raw}", raw);
             return null;
+        }
+    }
+
+    public async Task<IReadOnlyList<AiCategorizationResult?>> CategorizeBatchAsync(
+        IReadOnlyList<(string Description, decimal Amount, TransactionType Type)> transactions,
+        CancellationToken ct = default)
+    {
+        if (transactions.Count == 0) return [];
+
+        // Build numbered list for the prompt
+        var sb = new StringBuilder();
+        for (var i = 0; i < transactions.Count; i++)
+        {
+            var (desc, amount, type) = transactions[i];
+            sb.AppendLine($"{i + 1}. Description: {desc} | Amount: {amount:F2} | Type: {type}");
+        }
+
+        var prompt = _categorizeBatchPrompt.Replace("{transactions_list}", sb.ToString());
+
+        // maxTokens: ~80 tokens per result × count, capped at 4096
+        var maxTokens = Math.Min(transactions.Count * 80, 4096);
+        var raw = await CallGeminiAsync(prompt, maxTokens, ct);
+        if (raw is null) return Enumerable.Repeat<AiCategorizationResult?>(null, transactions.Count).ToList();
+
+        try
+        {
+            var parsed = JsonSerializer.Deserialize<CategorizationAiResponse[]>(raw, JsonOpts);
+            if (parsed is null) return Enumerable.Repeat<AiCategorizationResult?>(null, transactions.Count).ToList();
+
+            // Map to result list; pad with null if AI returned fewer items than expected
+            return Enumerable.Range(0, transactions.Count)
+                .Select(i => i < parsed.Length
+                    ? new AiCategorizationResult(parsed[i].Category, parsed[i].Confidence, parsed[i].Reasoning)
+                    : null)
+                .ToList<AiCategorizationResult?>();
+        }
+        catch (JsonException ex)
+        {
+            _logger.LogWarning(ex, "Failed to parse batch categorization response. Raw: {Raw}", raw);
+            return Enumerable.Repeat<AiCategorizationResult?>(null, transactions.Count).ToList();
         }
     }
 

@@ -66,6 +66,8 @@ builder.Services.AddValidatorsFromAssemblyContaining<CreateTransactionRequestVal
 builder.Services.Configure<GeminiOptions>(builder.Configuration.GetSection(GeminiOptions.Section));
 builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<IAiService, GeminiAiService>();
+builder.Services.AddSingleton<ImportJobStore>();
+builder.Services.AddScoped<ICsvImportService, CsvImportService>();
 
 builder.Services.AddHttpClient("Gemini", client =>
 {

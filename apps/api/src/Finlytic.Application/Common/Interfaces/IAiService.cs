@@ -17,6 +17,14 @@ public interface IAiService
         CancellationToken ct = default);
 
     /// <summary>
+    /// Categorizes multiple transactions in a single AI call (cheaper + faster than per-row calls).
+    /// Result list is parallel to input list — null means AI could not categorize that row.
+    /// </summary>
+    Task<IReadOnlyList<AiCategorizationResult?>> CategorizeBatchAsync(
+        IReadOnlyList<(string Description, decimal Amount, TransactionType Type)> transactions,
+        CancellationToken ct = default);
+
+    /// <summary>
     /// Generates financial insights from recent transactions.
     /// Returns empty list if AI is unavailable.
     /// </summary>
