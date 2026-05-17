@@ -1,0 +1,99 @@
+using Finlytic.Application.Common.DTOs.Auth;
+using Finlytic.Application.Common.Interfaces;
+using Finlytic.Domain.Entities;
+using Finlytic.Domain.Enums;
+using Finlytic.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+
+namespace Finlytic.Infrastructure.Services;
+
+public sealed class AuthService(
+    AppDbContext db,
+    ITokenService tokenService,
+    IConfiguration config,
+    ILogger<AuthService> logger) : IAuthService
+{
+    public async Task<AuthResponse> RegisterAsync(RegisterRequest request, CancellationToken ct = default)
+    {
+        var exists = await db.Users.AnyAsync(u => u.Email == request.Email.ToLowerInvariant(), ct);
+        if (exists)
+            throw new InvalidOperationException("Email already registered.");
+
+        var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password, workFactor: 12);
+        var user = User.Create(request.Email, passwordHash, request.Name);
+
+        db.Users.Add(user);
+        await db.SaveChangesAsync(ct);
+
+        await SeedDefaultCategoriesAsync(user.Id, ct);
+
+        logger.LogInformation("User registered: {UserId}", user.Id);
+
+        return await IssueTokensAsync(user, ct);
+    }
+
+    public async Task<AuthResponse> LoginAsync(LoginRequest request, CancellationToken ct = default)
+    {
+        var user = await db.Users
+            .FirstOrDefaultAsync(u => u.Email == request.Email.ToLowerInvariant(), ct);
+
+        if (user is null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
+            throw new UnauthorizedAccessException("Invalid email or password.");
+
+        logger.LogInformation("User logged in: {UserId}", user.Id);
+
+        return await IssueTokensAsync(user, ct);
+    }
+
+    public async Task<AuthResponse> RefreshAsync(string refreshToken, CancellationToken ct = default)
+    {
+        var token = await db.RefreshTokens
+            .Include(t => t.User)
+            .FirstOrDefaultAsync(t => t.Token == refreshToken, ct);
+
+        if (token is null || !token.IsActive)
+            throw new UnauthorizedAccessException("Invalid or expired refresh token.");
+
+        token.Revoke();
+        await db.SaveChangesAsync(ct);
+
+        return await IssueTokensAsync(token.User, ct);
+    }
+
+    private async Task SeedDefaultCategoriesAsync(Guid userId, CancellationToken ct)
+    {
+        var defaults = new[]
+        {
+            Category.Create(userId, "อาหารและเครื่องดื่ม", TransactionType.Expense, "#F97316", isDefault: true),
+            Category.Create(userId, "เดินทาง",             TransactionType.Expense, "#3B82F6", isDefault: true),
+            Category.Create(userId, "ที่อยู่อาศัย",        TransactionType.Expense, "#8B5CF6", isDefault: true),
+            Category.Create(userId, "ช้อปปิ้ง",            TransactionType.Expense, "#EC4899", isDefault: true),
+            Category.Create(userId, "บันเทิง",             TransactionType.Expense, "#F59E0B", isDefault: true),
+            Category.Create(userId, "สุขภาพ",              TransactionType.Expense, "#10B981", isDefault: true),
+            Category.Create(userId, "การศึกษา",            TransactionType.Expense, "#6366F1", isDefault: true),
+            Category.Create(userId, "รายจ่ายอื่นๆ",         TransactionType.Expense, "#6B7280", isDefault: true),
+            Category.Create(userId, "เงินเดือน",           TransactionType.Income,  "#22C55E", isDefault: true),
+            Category.Create(userId, "รายได้เสริม",         TransactionType.Income,  "#84CC16", isDefault: true),
+            Category.Create(userId, "รายรับอื่นๆ",          TransactionType.Income,  "#6B7280", isDefault: true),
+        };
+
+        db.Categories.AddRange(defaults);
+        await db.SaveChangesAsync(ct);
+    }
+
+    private async Task<AuthResponse> IssueTokensAsync(User user, CancellationToken ct)
+    {
+        var accessToken = tokenService.GenerateAccessToken(user);
+        var rawRefreshToken = tokenService.GenerateRefreshToken();
+        var expiryDays = int.Parse(config["Jwt:RefreshTokenExpiryDays"]!);
+
+        var refreshToken = RefreshToken.Create(user.Id, rawRefreshToken, expiryDays);
+        db.RefreshTokens.Add(refreshToken);
+        await db.SaveChangesAsync(ct);
+
+        var expiresAt = DateTime.UtcNow.AddMinutes(int.Parse(config["Jwt:AccessTokenExpiryMinutes"]!));
+        return new AuthResponse(accessToken, rawRefreshToken, expiresAt);
+    }
+}
