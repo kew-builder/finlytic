@@ -131,7 +131,7 @@ import {
                   </td>
                   <td class="tx-td-muted" style="font-size:13px">{{ tx.categoryName || '—' }}</td>
                   <td>
-                    <span class="tx-type-badge"
+                    <span class="badge"
                       [class.badge-income]="tx.type === 'Income'"
                       [class.badge-expense]="tx.type === 'Expense'">
                       {{ tx.type === 'Income' ? '↑ Income' : '↓ Expense' }}

@@ -754,16 +754,6 @@ body {
   &.danger:hover { background: oklch(62% 0.22 25 / 0.15); color: var(--coral); border-color: oklch(62% 0.22 25 / 0.3); }
 }
 
-.tx-type-badge {
-  display: inline-block;
-  padding: 3px 10px;
-  border-radius: 20px;
-  font-size: 11.5px;
-  font-weight: 600;
-
-  &.income  { background: rgba(45,212,191,0.12); color: #2dd4bf; }
-  &.expense { background: oklch(62% 0.22 25 / 0.12); color: oklch(62% 0.22 25); }
-}
 
 .tx-td-amount {
   text-align: right;
@@ -1052,28 +1042,21 @@ body {
   letter-spacing: 0.5px;
 }
 
-.badge-income {
+.badge {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  gap: 4px;
   padding: 3px 10px;
   border-radius: 20px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
-  background: oklch(65% 0.18 175 / 0.15);
-  color: var(--teal);
-  border: 1px solid oklch(65% 0.18 175 / 0.25);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
 }
-.badge-expense {
-  display: inline-flex;
-  align-items: center;
-  padding: 3px 10px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
-  background: oklch(62% 0.22 25 / 0.12);
-  color: var(--coral);
-  border: 1px solid oklch(62% 0.22 25 / 0.20);
-}
+.badge-income, .badge-expense { min-width: 78px; box-sizing: border-box; }
+.badge-income  { background: oklch(65% 0.18 175 / 0.15); color: var(--teal);  border: 1px solid oklch(65% 0.18 175 / 0.25); }
+.badge-expense { background: oklch(62% 0.22 25 / 0.12);  color: var(--coral); border: 1px solid oklch(62% 0.22 25 / 0.2); }
 
 .amount-pos { color: var(--teal); font-weight: 600; }
 .amount-neg { color: var(--coral); font-weight: 600; }
