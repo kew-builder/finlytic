@@ -189,6 +189,416 @@ body {
   transition: background 0.2s;
 }
 
+// ── Global card ─────────────────────────────────────────────────────────────
+
+.card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: var(--radius);
+  backdrop-filter: blur(12px);
+}
+
+// ── Dashboard layout ─────────────────────────────────────────────────────────
+
+.dashboard-content {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.dash-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.dash-greeting {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  margin: 0 0 4px;
+}
+
+.dash-sub {
+  font-size: 13px;
+  color: var(--muted);
+  margin: 0;
+}
+
+.month-pill {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px;
+  padding: 6px 14px;
+}
+
+// ── Summary row ──────────────────────────────────────────────────────────────
+
+.summary-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.summary-card {
+  padding: 22px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.summary-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.label-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.summary-value {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: var(--text);
+}
+
+.summary-change {
+  font-size: 12.5px;
+  font-weight: 500;
+}
+
+.change-up      { color: #2dd4bf; }
+.change-down    { color: oklch(62% 0.22 25); }
+.change-neutral { color: var(--muted); }
+
+.glow-violet {
+  box-shadow: 0 0 0 1px oklch(65% 0.25 280 / 0.2),
+              0 8px 32px rgba(0,0,0,0.3),
+              0 0 40px oklch(65% 0.25 280 / 0.08);
+}
+.glow-teal {
+  box-shadow: 0 0 0 1px oklch(65% 0.18 175 / 0.2),
+              0 8px 32px rgba(0,0,0,0.3),
+              0 0 40px oklch(65% 0.18 175 / 0.1);
+}
+.glow-coral {
+  box-shadow: 0 0 0 1px oklch(62% 0.22 25 / 0.15),
+              0 8px 32px rgba(0,0,0,0.3);
+}
+
+// ── Charts row ───────────────────────────────────────────────────────────────
+
+.charts-row {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 14px;
+}
+
+.chart-card {
+  padding: 22px 24px;
+}
+
+.chart-title {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 3px;
+}
+
+.chart-subtitle {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+
+.chart-wrap {
+  height: 220px;
+  position: relative;
+
+  canvas { width: 100% !important; height: 100% !important; }
+}
+
+.chart-legend {
+  display: flex;
+  gap: 16px;
+  margin-top: 14px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+// ── Donut chart ──────────────────────────────────────────────────────────────
+
+.donut-wrap {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.donut-canvas-wrap {
+  position: relative;
+  width: 160px;
+  height: 160px;
+  flex-shrink: 0;
+}
+
+.donut-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.donut-center-label {
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 2px;
+}
+
+.donut-center-value {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+.donut-legend {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.donut-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.donut-swatch {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.donut-legend-name {
+  font-size: 12px;
+  color: var(--muted);
+  width: 90px;
+  flex-shrink: 0;
+}
+
+.donut-bar-wrap {
+  flex: 1;
+  height: 4px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.donut-bar {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.6s ease;
+}
+
+.donut-pct {
+  font-size: 11px;
+  color: var(--muted);
+  width: 36px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+// ── Bottom row ───────────────────────────────────────────────────────────────
+
+.bottom-row {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 14px;
+}
+
+.section-card {
+  padding: 22px 24px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.section-title {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.view-all-link {
+  font-size: 12px;
+  color: var(--violet);
+  cursor: pointer;
+  font-weight: 500;
+
+  &:hover { opacity: 0.8; }
+}
+
+// ── Transaction list ─────────────────────────────────────────────────────────
+
+.tx-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.tx-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+
+  &:last-child { border-bottom: none; }
+}
+
+.tx-icon {
+  font-size: 20px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.04);
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.tx-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tx-desc {
+  font-size: 13.5px;
+  font-weight: 500;
+}
+
+.tx-meta {
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+.tx-amount {
+  font-size: 14px;
+  font-weight: 600;
+  text-align: right;
+  flex-shrink: 0;
+
+  &.income  { color: #2dd4bf; }
+  &.expense { color: oklch(62% 0.22 25); }
+}
+
+// ── AI Insights ──────────────────────────────────────────────────────────────
+
+.ai-card {
+  box-shadow: 0 0 0 1px oklch(65% 0.25 280 / 0.15),
+              0 8px 32px rgba(0,0,0,0.3),
+              0 0 40px oklch(65% 0.25 280 / 0.06);
+}
+
+.ai-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.ai-icon {
+  font-size: 18px;
+}
+
+.ai-title {
+  font-size: 15px;
+  font-weight: 600;
+  flex: 1;
+}
+
+.ai-badge {
+  font-size: 10.5px;
+  font-weight: 600;
+  background: oklch(65% 0.25 280 / 0.15);
+  color: oklch(75% 0.2 280);
+  border: 1px solid oklch(65% 0.25 280 / 0.25);
+  border-radius: 20px;
+  padding: 2px 9px;
+}
+
+.ai-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.insight-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.insight-bullet {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+
+.insight-text {
+  font-size: 13px;
+  color: rgba(232,232,240,0.8);
+  line-height: 1.5;
+}
+
+.ai-footer {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.ai-note {
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
 // ── Floating decorative shapes ───────────────────────────────────────────────
 
 @keyframes floatShape {
