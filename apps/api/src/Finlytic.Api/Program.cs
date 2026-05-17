@@ -1,5 +1,7 @@
 using System.Text;
 using Finlytic.Application.Common.Interfaces;
+using Finlytic.Application.Common.Validators;
+using FluentValidation;
 using Finlytic.Infrastructure.Persistence;
 using Finlytic.Infrastructure.Repositories;
 using Finlytic.Infrastructure.Services;
@@ -45,6 +47,7 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 builder.Services.AddScoped<ITransactionService, TransactionService>();
+builder.Services.AddValidatorsFromAssemblyContaining<CreateTransactionRequestValidator>();
 
 builder.Services.AddControllers();
 
