@@ -4,9 +4,13 @@ import {
   Component,
   ElementRef,
   OnDestroy,
+  OnInit,
   ViewChild,
   inject,
+  signal,
 } from '@angular/core';
+import { AiInsight } from '../transactions/models/transaction.model';
+import { TransactionService } from '../transactions/services/transaction.service';
 import {
   ArcElement,
   CategoryScale,
@@ -160,18 +164,38 @@ interface InsightItem {
           <div class="ai-header">
             <div class="ai-icon">✨</div>
             <div class="ai-title">AI Insights</div>
-            <div class="ai-badge">Claude</div>
+            <div class="ai-badge">Gemini</div>
           </div>
-          <div class="ai-list">
-            @for (insight of insights; track insight.text) {
-              <div class="insight-item">
-                <div class="insight-bullet" [style.background]="insight.color"></div>
-                <div class="insight-text">{{ insight.text }}</div>
-              </div>
-            }
-          </div>
+
+          @if (insightsLoading()) {
+            <div class="ai-list">
+              @for (s of [1,2,3]; track s) {
+                <div class="insight-skeleton"></div>
+              }
+            </div>
+          } @else if (insightsError()) {
+            <div class="ai-empty">Could not load insights. Try again later.</div>
+          } @else if (aiInsights().length === 0) {
+            <div class="ai-empty">No insights yet — add more transactions to get started.</div>
+          } @else {
+            <div class="ai-list">
+              @for (insight of aiInsights(); track insight.title) {
+                <div class="insight-item">
+                  <div class="insight-bullet" [style.background]="insightColor(insight.type)"></div>
+                  <div class="insight-body">
+                    <div class="insight-title">{{ insightIcon(insight.type) }} {{ insight.title }}</div>
+                    <div class="insight-text">{{ insight.description }}</div>
+                    @if (insight.amount) {
+                      <div class="insight-amount">฿{{ insight.amount.toLocaleString() }}</div>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          }
+
           <div class="ai-footer">
-            <span class="ai-note">✦ Powered by Claude AI — coming soon</span>
+            <span class="ai-note">✦ Powered by Gemini AI</span>
           </div>
         </div>
 
@@ -179,7 +203,7 @@ interface InsightItem {
     </div>
   `,
 })
-export class DashboardComponent implements AfterViewInit, OnDestroy {
+export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('lineCanvas') lineCanvas!: ElementRef<HTMLCanvasElement>;
   @ViewChild('donutCanvas') donutCanvas!: ElementRef<HTMLCanvasElement>;
 
@@ -187,6 +211,26 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
   private donutChart?: Chart;
 
   auth = inject(AuthService);
+  private txService = inject(TransactionService);
+
+  aiInsights = signal<AiInsight[]>([]);
+  insightsLoading = signal(true);
+  insightsError = signal(false);
+
+  ngOnInit(): void {
+    this.txService.getInsights().subscribe({
+      next: (data) => { this.aiInsights.set(data); this.insightsLoading.set(false); },
+      error: () => { this.insightsError.set(true); this.insightsLoading.set(false); },
+    });
+  }
+
+  insightIcon(type: AiInsight['type']): string {
+    return { overspending: '⚠️', trend: '📈', anomaly: '🔍', saving_opportunity: '💡' }[type] ?? '✨';
+  }
+
+  insightColor(type: AiInsight['type']): string {
+    return { overspending: '#fb923c', trend: '#2dd4bf', anomaly: '#a78bfa', saving_opportunity: '#facc15' }[type] ?? '#94a3b8';
+  }
 
   readonly summaryCards: SummaryCard[] = [
     {
@@ -234,11 +278,6 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
     { emoji: '🛒', desc: "Lotus's Grocery",          date: 'Apr 29', amount: -1250,  cat: 'Shopping' },
   ];
 
-  readonly insights: InsightItem[] = [
-    { text: 'Food spending is 23% higher than last month — mainly dining out.', color: '#fb923c' },
-    { text: "You've spent ฿2,400 on subscriptions. Consider reviewing unused ones.", color: '#facc15' },
-    { text: "At current rate, you'll save ฿12,550 this month — ฿2,000 more than April. 🎉", color: '#2dd4bf' },
-  ];
 
   formatFull(n: number): string {
     return `฿${Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;

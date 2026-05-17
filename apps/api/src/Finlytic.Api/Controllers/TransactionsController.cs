@@ -14,9 +14,26 @@ namespace Finlytic.Api.Controllers;
 [Authorize]
 public sealed class TransactionsController(
     ITransactionService service,
+    IAiService aiService,
     IValidator<CreateTransactionRequest> createValidator,
     IValidator<UpdateTransactionRequest> updateValidator) : ControllerBase
 {
+    [HttpPost("suggest")]
+    public async Task<IActionResult> SuggestCategory(
+        [FromBody] SuggestCategoryRequest request, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(request.Description) || request.Description.Length < 2)
+            return BadRequest(new { error = "Description too short to suggest a category." });
+
+        var result = await aiService.CategorizeAsync(
+            request.Description, request.Amount, request.Type, ct);
+
+        if (result is null)
+            return Ok(new { categoryName = (string?)null, confidence = 0 });
+
+        return Ok(new { categoryName = result.CategoryName, confidence = result.Confidence });
+    }
+
     [HttpGet]
     public async Task<IActionResult> GetAll(
         [FromQuery] DateOnly? startDate,
