@@ -1,6 +1,7 @@
 using System.Text;
 using Finlytic.Application.Common.Interfaces;
 using Finlytic.Infrastructure.Persistence;
+using Finlytic.Infrastructure.Repositories;
 using Finlytic.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -42,6 +43,7 @@ builder.Services.AddAuthorization();
 
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 
 builder.Services.AddControllers();
 
