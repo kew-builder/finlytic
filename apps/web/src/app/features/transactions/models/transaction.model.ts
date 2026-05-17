@@ -33,6 +33,28 @@ export interface CategoryMeta {
   bg: string;
 }
 
+export interface AiSuggestion {
+  categoryName: string | null;
+  confidence: number;
+}
+
+export interface ImportJobResponse {
+  jobId: string;
+  status: 'queued' | 'processing' | 'completed' | 'failed';
+  total: number;
+  processed: number;
+  imported: number;
+  failed: number;
+  errors: string[];
+}
+
+export interface AiInsight {
+  type: 'overspending' | 'trend' | 'anomaly' | 'saving_opportunity';
+  title: string;
+  description: string;
+  amount: number | null;
+}
+
 // Hardcoded สำหรับ Phase 2 — Phase 3 จะ fetch จาก /categories API แทน
 export const DEFAULT_CATEGORIES: CategoryMeta[] = [
   { name: 'Food & Dining', emoji: '🍜', bg: 'rgba(167,139,250,0.12)' },

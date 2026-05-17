@@ -1,7 +1,9 @@
-import { ChangeDetectionStrategy, Component, OnInit, signal, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, OnDestroy, signal, computed, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { TransactionService } from './services/transaction.service';
 import {
+  AiSuggestion,
   CategoryMeta,
   CreateTransactionRequest,
   DEFAULT_CATEGORIES,
@@ -11,7 +13,7 @@ import {
 @Component({
   selector: 'app-transactions',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="tx-page">
@@ -20,7 +22,7 @@ import {
       <div class="tx-page-header">
         <h1 class="tx-page-title">Transactions</h1>
         <div class="tx-header-actions">
-          <button class="btn-ghost" disabled style="opacity:0.5;cursor:not-allowed">📄 Import CSV</button>
+          <a routerLink="/import" class="btn-ghost">📄 Import CSV</a>
           <button class="btn-primary" (click)="openAdd()">＋ Add Transaction</button>
         </div>
       </div>
@@ -217,7 +219,21 @@ import {
               <div class="form-group">
                 <label class="form-label">Description</label>
                 <input class="form-input" type="text" maxlength="500"
-                  [(ngModel)]="fDescription" placeholder="e.g. Lunch at MK Restaurant, Monthly Salary…" />
+                  [(ngModel)]="fDescription"
+                  (ngModelChange)="onDescriptionChange($event)"
+                  placeholder="e.g. Lunch at MK Restaurant, Monthly Salary…" />
+                @if (suggestingCategory()) {
+                  <div class="ai-hint">✨ Thinking…</div>
+                }
+                @if (aiSuggestion() && !suggestingCategory()) {
+                  <div class="ai-suggestion">
+                    <span class="ai-suggestion-label">
+                      ✨ Suggested: <strong>{{ aiSuggestion()!.categoryName }}</strong>
+                      <span class="ai-confidence">({{ aiSuggestion()!.confidence }}%)</span>
+                    </span>
+                    <button type="button" class="ai-apply-btn" (click)="applyAiSuggestion()">Apply</button>
+                  </div>
+                }
               </div>
 
               <!-- Category -->
@@ -283,7 +299,7 @@ import {
     </div>
   `,
 })
-export class TransactionsComponent implements OnInit {
+export class TransactionsComponent implements OnInit, OnDestroy {
   private svc = inject(TransactionService);
 
   readonly currentPeriodLabel = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
@@ -328,6 +344,11 @@ export class TransactionsComponent implements OnInit {
   fDate = new Date().toISOString().split('T')[0];
   fCategory = '';
   fNote = '';
+
+  // AI category suggestion
+  aiSuggestion = signal<AiSuggestion | null>(null);
+  suggestingCategory = signal(false);
+  private suggestTimer?: ReturnType<typeof setTimeout>;
 
   // Computed: pagination
   paged = computed(() => {
@@ -496,6 +517,33 @@ export class TransactionsComponent implements OnInit {
 
   prevPage(): void { this.page.update(p => p - 1); }
   nextPage(): void { this.page.update(p => p + 1); }
+
+  onDescriptionChange(value: string): void {
+    this.aiSuggestion.set(null);
+    clearTimeout(this.suggestTimer);
+    if (value.trim().length < 4) return;
+
+    this.suggestTimer = setTimeout(() => {
+      const amount = parseFloat(this.fAmount) || 0;
+      this.suggestingCategory.set(true);
+      this.svc.suggestCategory(value.trim(), amount, this.fType).subscribe({
+        next: (result) => {
+          if (result.categoryName) this.aiSuggestion.set(result);
+          this.suggestingCategory.set(false);
+        },
+        error: () => this.suggestingCategory.set(false),
+      });
+    }, 600);
+  }
+
+  applyAiSuggestion(): void {
+    const s = this.aiSuggestion();
+    if (s?.categoryName) this.fCategory = s.categoryName;
+  }
+
+  ngOnDestroy(): void {
+    clearTimeout(this.suggestTimer);
+  }
 
   getCategoryMeta(name: string | null): CategoryMeta {
     return this.categories.find(c => c.name === name)
