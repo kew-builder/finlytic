@@ -1263,3 +1263,261 @@ body {
 .insight-body { flex: 1; }
 .insight-title { font-size: 13px; font-weight: 600; color: #e2e8f0; margin-bottom: 2px; }
 .insight-amount { font-size: 12px; color: #a78bfa; margin-top: 2px; font-weight: 600; }
+
+// ── Period toggle (Phase 4 dashboard) ────────────────────────────────────────
+
+.period-toggle {
+  display: flex;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.period-btn {
+  padding: 0 14px;
+  height: 34px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-family: 'Outfit', sans-serif;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  border-right: 1px solid rgba(255,255,255,0.08);
+
+  &:last-child { border-right: none; }
+  &:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+  &.active { color: var(--violet); background: oklch(65% 0.25 280 / 0.15); }
+}
+
+// ── Summary row 4-col ─────────────────────────────────────────────────────────
+
+.summary-row-4 {
+  grid-template-columns: repeat(4, 1fr);
+
+  @media (max-width: 900px) { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 480px) { grid-template-columns: 1fr; }
+}
+
+// ── Skeleton loading ──────────────────────────────────────────────────────────
+
+.skeleton-card {
+  background: linear-gradient(90deg,
+    rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.03) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+
+.chart-skeleton {
+  height: 220px;
+  border-radius: 8px;
+  background: linear-gradient(90deg,
+    rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.03) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+
+// Responsive charts rows
+.charts-row {
+  @media (max-width: 900px) { grid-template-columns: 1fr; }
+}
+.bottom-row {
+  @media (max-width: 900px) { grid-template-columns: 1fr; }
+}
+
+// ── Budget page (Phase 4) ─────────────────────────────────────────────────────
+
+.page-content {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.page-title {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  margin: 0 0 4px;
+}
+
+.page-sub {
+  font-size: 13px;
+  color: var(--muted);
+  margin: 0;
+}
+
+.budget-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
+}
+
+.budget-card {
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  &.over-budget {
+    border-color: rgba(251,146,60,0.3);
+    box-shadow: 0 0 0 1px rgba(251,146,60,0.15), 0 8px 32px rgba(0,0,0,0.3);
+  }
+}
+
+.budget-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.budget-category {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.budget-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.budget-cat-name {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.budget-actions {
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.budget-card:hover .budget-actions { opacity: 1; }
+
+.icon-btn {
+  background: none;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 6px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.12s;
+
+  &:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.16); }
+}
+
+.budget-amounts {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.budget-spent {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.4px;
+}
+
+.budget-period {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.budget-progress-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.budget-progress-bar {
+  height: 5px;
+  background: rgba(255,255,255,0.07);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.budget-progress-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+.budget-pct {
+  font-size: 11.5px;
+  color: var(--muted);
+  font-weight: 500;
+
+  &.over { color: #fb923c; }
+}
+
+// ── Modal (generic — budget + others) ────────────────────────────────────────
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 16px;
+}
+
+.modal {
+  background: #13132a;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--radius);
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  &.modal-sm { max-width: 360px; }
+
+  // Override global modal-header/footer padding for budget-style modals
+  // (budget .modal already has padding:24px on wrapper, so inner elements need padding:0)
+  .modal-header { padding: 0; }
+  .modal-footer { padding: 0; }
+}
+
+.form-error {
+  padding: 10px 14px;
+  background: oklch(62% 0.22 25 / 0.12);
+  border: 1px solid oklch(62% 0.22 25 / 0.3);
+  border-radius: var(--radius-sm);
+  font-size: 12.5px;
+  color: oklch(62% 0.22 25);
+}
+
+// ── Empty state ───────────────────────────────────────────────────────────────
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 56px 24px;
+  text-align: center;
+}
+
+.empty-icon { font-size: 40px; }
+.empty-title { font-size: 16px; font-weight: 600; }
+.empty-sub { font-size: 13px; color: var(--muted); margin-bottom: 8px; }
