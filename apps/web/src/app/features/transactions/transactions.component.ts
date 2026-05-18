@@ -85,24 +85,8 @@ import {
         <div class="tx-error">{{ error() }}</div>
       }
 
-      <!-- Loading -->
-      @if (loading()) {
-        <div class="tx-loading">Loading...</div>
-      }
-
-      <!-- Empty state -->
-      @if (!loading() && !error() && filtered().length === 0) {
-        <div class="card tx-empty">
-          <div class="tx-empty-icon">📋</div>
-          <div class="tx-empty-title">No transactions found</div>
-          <div class="tx-empty-sub">
-            {{ transactions().length === 0 ? 'Click "+ Add Transaction" to get started' : 'Try adjusting your filters' }}
-          </div>
-        </div>
-      }
-
-      <!-- Table -->
-      @if (!loading() && filtered().length > 0) {
+      <!-- Table (shows skeleton rows while loading, empty state, or real data) -->
+      @if (!error()) {
         <div class="card tx-table-wrap">
           <table class="tx-table">
             <thead>
@@ -116,48 +100,78 @@ import {
               </tr>
             </thead>
             <tbody>
-              @for (tx of paged(); track tx.id) {
-                <tr class="tx-table-row">
-                  <td class="tx-td-muted">{{ formatDate(tx.transactionDate) }}</td>
-                  <td>
-                    <div class="tx-desc-cell">
-                      <div class="cat-icon" [style.background]="getCategoryMeta(tx.categoryName).bg">
-                        {{ getCategoryMeta(tx.categoryName).emoji }}
+              @if (loading()) {
+                @for (s of skeletonRows; track s) {
+                  <tr class="tx-table-row">
+                    <td><span class="skeleton" style="width:56px;height:12px"></span></td>
+                    <td>
+                      <div class="tx-desc-cell">
+                        <span class="skeleton skeleton-circle" style="width:34px;height:34px"></span>
+                        <span class="skeleton" [style.width]="(s % 3 === 0 ? 160 : s % 3 === 1 ? 120 : 140) + 'px'" style="height:13px"></span>
                       </div>
-                      <div class="tx-desc-text">
-                        <span class="tx-desc-main">{{ tx.description || '—' }}</span>
-                        @if (tx.aiCategorized) {
-                          <span class="badge-ai">AI</span>
-                        }
+                    </td>
+                    <td><span class="skeleton" [style.width]="(s % 2 === 0 ? 80 : 70) + 'px'" style="height:12px"></span></td>
+                    <td><span class="skeleton skeleton-pill" style="width:78px;height:20px"></span></td>
+                    <td style="text-align:right"><span class="skeleton" [style.width]="(s % 2 === 0 ? 72 : 60) + 'px'" style="height:13px"></span></td>
+                    <td></td>
+                  </tr>
+                }
+              } @else if (filtered().length === 0) {
+                <tr>
+                  <td colspan="6">
+                    <div class="tx-empty">
+                      <div class="tx-empty-icon">📋</div>
+                      <div class="tx-empty-title">No transactions found</div>
+                      <div class="tx-empty-sub">
+                        {{ transactions().length === 0 ? 'Click "+ Add Transaction" to get started' : 'Try adjusting your filters' }}
                       </div>
-                    </div>
-                  </td>
-                  <td class="tx-td-muted" style="font-size:13px">{{ tx.categoryName || '—' }}</td>
-                  <td>
-                    <span class="badge"
-                      [class.badge-income]="tx.type === 'Income'"
-                      [class.badge-expense]="tx.type === 'Expense'">
-                      {{ tx.type === 'Income' ? '↑ Income' : '↓ Expense' }}
-                    </span>
-                  </td>
-                  <td class="tx-th-amount">
-                    <span [class.amount-pos]="tx.type === 'Income'" [class.amount-neg]="tx.type === 'Expense'">
-                      {{ tx.type === 'Income' ? '+' : '-' }}{{ formatAmount(tx.amount) }}
-                    </span>
-                  </td>
-                  <td>
-                    <div class="row-actions">
-                      <button class="row-action-btn" (click)="openEdit(tx)" title="Edit">✎</button>
-                      <button class="row-action-btn danger" (click)="openDelete(tx)" title="Delete">🗑</button>
                     </div>
                   </td>
                 </tr>
+              } @else {
+                @for (tx of paged(); track tx.id) {
+                  <tr class="tx-table-row">
+                    <td class="tx-td-muted">{{ formatDate(tx.transactionDate) }}</td>
+                    <td>
+                      <div class="tx-desc-cell">
+                        <div class="cat-icon" [style.background]="getCategoryMeta(tx.categoryName).bg">
+                          {{ getCategoryMeta(tx.categoryName).emoji }}
+                        </div>
+                        <div class="tx-desc-text">
+                          <span class="tx-desc-main">{{ tx.description || '—' }}</span>
+                          @if (tx.aiCategorized) {
+                            <span class="badge-ai">AI</span>
+                          }
+                        </div>
+                      </div>
+                    </td>
+                    <td class="tx-td-muted" style="font-size:13px">{{ tx.categoryName || '—' }}</td>
+                    <td>
+                      <span class="badge"
+                        [class.badge-income]="tx.type === 'Income'"
+                        [class.badge-expense]="tx.type === 'Expense'">
+                        {{ tx.type === 'Income' ? '↑ Income' : '↓ Expense' }}
+                      </span>
+                    </td>
+                    <td class="tx-th-amount">
+                      <span [class.amount-pos]="tx.type === 'Income'" [class.amount-neg]="tx.type === 'Expense'">
+                        {{ tx.type === 'Income' ? '+' : '-' }}{{ formatAmount(tx.amount) }}
+                      </span>
+                    </td>
+                    <td>
+                      <div class="row-actions">
+                        <button class="row-action-btn" (click)="openEdit(tx)" title="Edit">✎</button>
+                        <button class="row-action-btn danger" (click)="openDelete(tx)" title="Delete">🗑</button>
+                      </div>
+                    </td>
+                  </tr>
+                }
               }
             </tbody>
           </table>
 
           <!-- Pagination -->
-          @if (totalPages() > 1) {
+          @if (!loading() && totalPages() > 1) {
             <div class="pagination-bar">
               <div class="pagination-info">
                 Showing {{ showingFrom() }}–{{ showingTo() }} of {{ filtered().length }} transactions
@@ -313,6 +327,7 @@ export class TransactionsComponent implements OnInit, OnDestroy {
     { value: 'Expense', label: 'Expense' },
   ];
   readonly perPage = 10;
+  readonly skeletonRows = [1,2,3,4,5,6,7,8];
 
   // Data
   transactions = signal<TransactionResponse[]>([]);

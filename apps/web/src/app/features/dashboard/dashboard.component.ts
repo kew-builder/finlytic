@@ -342,6 +342,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   private loadDashboard(): void {
     this.loading.set(true);
+
+    // Destroy existing charts before loading — canvases are removed from DOM while
+    // loading=true (@else block), so old Chart instances reference detached elements.
+    // Clearing them forces recreation on the fresh canvases after data arrives.
+    this.lineChart?.destroy();  this.lineChart = undefined;
+    this.donutChart?.destroy(); this.donutChart = undefined;
+    this.barChart?.destroy();   this.barChart = undefined;
+
     const { startDate, endDate } = this.getDateRange();
     const now = new Date();
 

@@ -3,6 +3,7 @@ import {
   ChangeDetectorRef,
   Component,
   OnInit,
+  computed,
   inject,
   signal,
 } from '@angular/core';
@@ -26,6 +27,45 @@ import { BudgetResponse, CreateBudgetRequest } from './models/budget.model';
         </div>
         <button class="btn-primary" (click)="openCreate()">+ Add Budget</button>
       </div>
+
+      <!-- Overview ring card -->
+      @if (!loading() && budgets().length > 0) {
+        <div class="card budget-overview">
+          <div class="budget-ring-wrap">
+            <svg width="160" height="160" viewBox="0 0 160 160">
+              <!-- Track -->
+              <circle cx="80" cy="80" r="64" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="12"/>
+              <!-- Fill -->
+              <circle cx="80" cy="80" r="64" fill="none"
+                [attr.stroke]="ringColor()"
+                stroke-width="12"
+                stroke-linecap="round"
+                [attr.stroke-dasharray]="ringCircumference"
+                [attr.stroke-dashoffset]="ringOffset()"
+                style="transition: stroke-dashoffset 0.6s ease, stroke 0.4s ease"/>
+            </svg>
+            <div class="budget-ring-center">
+              <span class="budget-ring-pct" [style.color]="ringColor()">{{ overallPct() }}%</span>
+              <span class="budget-ring-label">used</span>
+            </div>
+          </div>
+
+          <div class="budget-ring-stats">
+            <div class="budget-ring-stat">
+              <span class="budget-ring-stat-label">Total Budget</span>
+              <span class="budget-ring-stat-val">฿{{ totalBudget().toLocaleString() }}</span>
+            </div>
+            <div class="budget-ring-stat">
+              <span class="budget-ring-stat-label">Total Spent</span>
+              <span class="budget-ring-stat-val" [style.color]="ringColor()">฿{{ totalSpent().toLocaleString() }}</span>
+            </div>
+            <div class="budget-ring-stat">
+              <span class="budget-ring-stat-label">Remaining</span>
+              <span class="budget-ring-stat-val" style="color:var(--teal)">฿{{ remaining().toLocaleString() }}</span>
+            </div>
+          </div>
+        </div>
+      }
 
       <!-- Budget List -->
       @if (loading()) {
@@ -66,7 +106,7 @@ import { BudgetResponse, CreateBudgetRequest } from './models/budget.model';
                   <div
                     class="budget-progress-fill"
                     [style.width.%]="Math.min(spentPct(b), 100)"
-                    [style.background]="spentPct(b) > 100 ? '#fb923c' : b.categoryColor">
+                    [style.background]="progressColor(spentPct(b))">
                   </div>
                 </div>
                 <span class="budget-pct" [class.over]="spentPct(b) > 100">
@@ -75,6 +115,23 @@ import { BudgetResponse, CreateBudgetRequest } from './models/budget.model';
               </div>
             </div>
           }
+        </div>
+
+        <!-- AI Budget Insights -->
+        <div class="card budget-ai-insights">
+          <div class="budget-insights-header">
+            <span style="font-size:18px">✨</span>
+            <span class="budget-insights-title">AI Budget Insights</span>
+            <span class="ai-badge">AI</span>
+          </div>
+          <div class="budget-insights-list">
+            @for (insight of aiInsights; track insight.text) {
+              <div class="budget-insight-item">
+                <span class="budget-insight-dot" [style.background]="insight.color"></span>
+                <span>{{ insight.text }}</span>
+              </div>
+            }
+          </div>
         </div>
       }
 
@@ -178,6 +235,38 @@ export class BudgetComponent implements OnInit {
   form: { categoryId: string; amount: number; period: string; startDate: string } = {
     categoryId: '', amount: 0, period: 'Monthly', startDate: '',
   };
+
+  // Ring constants
+  readonly ringCircumference = 2 * Math.PI * 64; // r=64
+
+  // Computed ring values
+  readonly totalBudget = computed(() => this.budgets().reduce((s, b) => s + b.amount, 0));
+  readonly totalSpent  = computed(() => Math.round(this.budgets().reduce((s, b) => s + (this.spentPct(b) / 100) * b.amount, 0)));
+  readonly remaining   = computed(() => Math.max(0, this.totalBudget() - this.totalSpent()));
+  readonly overallPct  = computed(() => {
+    const total = this.totalBudget();
+    return total > 0 ? Math.min(Math.round((this.totalSpent() / total) * 100), 100) : 0;
+  });
+  readonly ringOffset  = computed(() => this.ringCircumference * (1 - this.overallPct() / 100));
+
+  ringColor(): string {
+    const pct = this.overallPct();
+    if (pct >= 90) return 'var(--coral)';
+    if (pct >= 70) return 'var(--amber)';
+    return 'oklch(65% 0.25 280)';
+  }
+
+  progressColor(pct: number): string {
+    if (pct >= 90) return 'var(--coral)';
+    if (pct >= 70) return 'var(--amber)';
+    return 'oklch(65% 0.25 280)';
+  }
+
+  readonly aiInsights = [
+    { color: 'var(--coral)', text: 'Food & Dining is tracking 18% above last month — consider reviewing dining out frequency.' },
+    { color: 'var(--amber)', text: 'Entertainment budget is at 65% with 12 days left in the month.' },
+    { color: 'var(--teal)',  text: 'Transportation spending is on track — you\'re 20% under budget so far this month.' },
+  ];
 
   // Simulated spent amounts — real implementation would come from BudgetVsActual API
   // For Phase 4 MVP: show 0% until dashboard provides the spent data
