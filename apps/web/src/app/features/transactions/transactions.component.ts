@@ -1,12 +1,13 @@
-import { ChangeDetectionStrategy, Component, OnInit, OnDestroy, signal, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, OnDestroy, signal, computed, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { TransactionService } from './services/transaction.service';
+import { CategoryService } from './services/category.service';
 import {
   AiSuggestion,
-  CategoryMeta,
+  CategoryDto,
+  CATEGORY_ICON_MAP,
   CreateTransactionRequest,
-  DEFAULT_CATEGORIES,
   TransactionResponse,
 } from './models/transaction.model';
 
@@ -16,6 +17,16 @@ import {
   imports: [FormsModule, RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
+    <!-- Splash screen — shown on initial load, fades out after 900ms -->
+    <div class="splash" [class.hidden]="!bootLoading()">
+      <div class="splash-logo">
+        <div class="logo-mark">F</div>
+        <div class="logo-text">Finlytic</div>
+      </div>
+      <div class="splash-progress"></div>
+      <div class="splash-hint">Loading your finances...</div>
+    </div>
+
     <div class="tx-page">
 
       <!-- Page header -->
@@ -56,8 +67,8 @@ import {
 
         <select class="filter-input" [(ngModel)]="filterCategory" (ngModelChange)="applyFilters()">
           <option value="">All Categories</option>
-          @for (c of categories; track c.name) {
-            <option [value]="c.name">{{ c.emoji }} {{ c.name }}</option>
+          @for (c of categories(); track c.id) {
+            <option [value]="c.id">{{ c.name }}</option>
           }
         </select>
 
@@ -84,24 +95,8 @@ import {
         <div class="tx-error">{{ error() }}</div>
       }
 
-      <!-- Loading -->
-      @if (loading()) {
-        <div class="tx-loading">Loading...</div>
-      }
-
-      <!-- Empty state -->
-      @if (!loading() && !error() && filtered().length === 0) {
-        <div class="card tx-empty">
-          <div class="tx-empty-icon">📋</div>
-          <div class="tx-empty-title">No transactions found</div>
-          <div class="tx-empty-sub">
-            {{ transactions().length === 0 ? 'Click "+ Add Transaction" to get started' : 'Try adjusting your filters' }}
-          </div>
-        </div>
-      }
-
-      <!-- Table -->
-      @if (!loading() && filtered().length > 0) {
+      <!-- Table (shows skeleton rows while loading, empty state, or real data) -->
+      @if (!error()) {
         <div class="card tx-table-wrap">
           <table class="tx-table">
             <thead>
@@ -115,48 +110,78 @@ import {
               </tr>
             </thead>
             <tbody>
-              @for (tx of paged(); track tx.id) {
-                <tr class="tx-table-row">
-                  <td class="tx-td-muted">{{ formatDate(tx.transactionDate) }}</td>
-                  <td>
-                    <div class="tx-desc-cell">
-                      <div class="cat-icon" [style.background]="getCategoryMeta(tx.categoryName).bg">
-                        {{ getCategoryMeta(tx.categoryName).emoji }}
+              @if (loading()) {
+                @for (s of skeletonRows; track s) {
+                  <tr class="tx-table-row">
+                    <td><span class="skeleton" style="width:56px;height:12px"></span></td>
+                    <td>
+                      <div class="tx-desc-cell">
+                        <span class="skeleton skeleton-circle" style="width:34px;height:34px"></span>
+                        <span class="skeleton" [style.width]="(s % 3 === 0 ? 160 : s % 3 === 1 ? 120 : 140) + 'px'" style="height:13px"></span>
                       </div>
-                      <div class="tx-desc-text">
-                        <span class="tx-desc-main">{{ tx.description || '—' }}</span>
-                        @if (tx.aiCategorized) {
-                          <span class="badge-ai">AI</span>
-                        }
+                    </td>
+                    <td><span class="skeleton" [style.width]="(s % 2 === 0 ? 80 : 70) + 'px'" style="height:12px"></span></td>
+                    <td><span class="skeleton skeleton-pill" style="width:78px;height:20px"></span></td>
+                    <td style="text-align:right"><span class="skeleton" [style.width]="(s % 2 === 0 ? 72 : 60) + 'px'" style="height:13px"></span></td>
+                    <td></td>
+                  </tr>
+                }
+              } @else if (filtered().length === 0) {
+                <tr>
+                  <td colspan="6">
+                    <div class="tx-empty">
+                      <div class="tx-empty-icon">📋</div>
+                      <div class="tx-empty-title">No transactions found</div>
+                      <div class="tx-empty-sub">
+                        {{ transactions().length === 0 ? 'Click "+ Add Transaction" to get started' : 'Try adjusting your filters' }}
                       </div>
-                    </div>
-                  </td>
-                  <td class="tx-td-muted" style="font-size:13px">{{ tx.categoryName || '—' }}</td>
-                  <td>
-                    <span class="badge"
-                      [class.badge-income]="tx.type === 'Income'"
-                      [class.badge-expense]="tx.type === 'Expense'">
-                      {{ tx.type === 'Income' ? '↑ Income' : '↓ Expense' }}
-                    </span>
-                  </td>
-                  <td class="tx-th-amount">
-                    <span [class.amount-pos]="tx.type === 'Income'" [class.amount-neg]="tx.type === 'Expense'">
-                      {{ tx.type === 'Income' ? '+' : '-' }}{{ formatAmount(tx.amount) }}
-                    </span>
-                  </td>
-                  <td>
-                    <div class="row-actions">
-                      <button class="row-action-btn" (click)="openEdit(tx)" title="Edit">✎</button>
-                      <button class="row-action-btn danger" (click)="openDelete(tx)" title="Delete">🗑</button>
                     </div>
                   </td>
                 </tr>
+              } @else {
+                @for (tx of paged(); track tx.id) {
+                  <tr class="tx-table-row">
+                    <td class="tx-td-muted">{{ formatDate(tx.transactionDate) }}</td>
+                    <td>
+                      <div class="tx-desc-cell">
+                        <div class="cat-icon" [style.background]="getCategoryMeta(tx.categoryName).bg">
+                          {{ getCategoryMeta(tx.categoryName).emoji }}
+                        </div>
+                        <div class="tx-desc-text">
+                          <span class="tx-desc-main">{{ tx.description || '—' }}</span>
+                          @if (tx.aiCategorized) {
+                            <span class="badge-ai">AI</span>
+                          }
+                        </div>
+                      </div>
+                    </td>
+                    <td class="tx-td-muted" style="font-size:13px">{{ tx.categoryName || '—' }}</td>
+                    <td>
+                      <span class="badge"
+                        [class.badge-income]="tx.type === 'Income'"
+                        [class.badge-expense]="tx.type === 'Expense'">
+                        {{ tx.type === 'Income' ? '↑ Income' : '↓ Expense' }}
+                      </span>
+                    </td>
+                    <td class="tx-th-amount">
+                      <span [class.amount-pos]="tx.type === 'Income'" [class.amount-neg]="tx.type === 'Expense'">
+                        {{ tx.type === 'Income' ? '+' : '-' }}{{ formatAmount(tx.amount) }}
+                      </span>
+                    </td>
+                    <td>
+                      <div class="row-actions">
+                        <button class="row-action-btn" (click)="openEdit(tx)" title="Edit">✎</button>
+                        <button class="row-action-btn danger" (click)="openDelete(tx)" title="Delete">🗑</button>
+                      </div>
+                    </td>
+                  </tr>
+                }
               }
             </tbody>
           </table>
 
           <!-- Pagination -->
-          @if (totalPages() > 1) {
+          @if (!loading() && totalPages() > 1) {
             <div class="pagination-bar">
               <div class="pagination-info">
                 Showing {{ showingFrom() }}–{{ showingTo() }} of {{ filtered().length }} transactions
@@ -241,8 +266,8 @@ import {
                 <label class="form-label">Category</label>
                 <select class="form-input" [(ngModel)]="fCategory">
                   <option value="">Select category…</option>
-                  @for (c of categories; track c.name) {
-                    <option [value]="c.name">{{ c.emoji }} {{ c.name }}</option>
+                  @for (c of categories(); track c.id) {
+                    <option [value]="c.id">{{ c.name }}</option>
                   }
                 </select>
               </div>
@@ -301,15 +326,22 @@ import {
 })
 export class TransactionsComponent implements OnInit, OnDestroy {
   private svc = inject(TransactionService);
+  private categorySvc = inject(CategoryService);
+  private cdr = inject(ChangeDetectorRef);
 
   readonly currentPeriodLabel = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-  readonly categories = DEFAULT_CATEGORIES;
+  categories = signal<CategoryDto[]>([]);
   readonly typeOptions = [
     { value: '',        label: 'All' },
     { value: 'Income',  label: 'Income' },
     { value: 'Expense', label: 'Expense' },
   ];
   readonly perPage = 10;
+  readonly skeletonRows = [1,2,3,4,5,6,7,8];
+
+  // Splash: shown on first load only, fades out after 900ms
+  bootLoading = signal(true);
+  private bootTimer?: ReturnType<typeof setTimeout>;
 
   // Data
   transactions = signal<TransactionResponse[]>([]);
@@ -369,7 +401,18 @@ export class TransactionsComponent implements OnInit, OnDestroy {
   absNet = computed(() => Math.abs(this.netAmount()));
 
   ngOnInit(): void {
+    this.bootTimer = setTimeout(() => {
+      this.bootLoading.set(false);
+      this.cdr.markForCheck();
+    }, 900);
     this.load();
+    this.loadCategories();
+  }
+
+  private loadCategories(): void {
+    this.categorySvc.getAll().subscribe({
+      next: (cats) => this.categories.set(cats),
+    });
   }
 
   load(): void {
@@ -393,7 +436,7 @@ export class TransactionsComponent implements OnInit, OnDestroy {
     if (this.filterType) list = list.filter(t => t.type === this.filterType);
     if (this.filterStart) list = list.filter(t => t.transactionDate >= this.filterStart);
     if (this.filterEnd)   list = list.filter(t => t.transactionDate <= this.filterEnd);
-    if (this.filterCategory) list = list.filter(t => t.categoryName === this.filterCategory);
+    if (this.filterCategory) list = list.filter(t => t.categoryId === this.filterCategory);
     if (this.filterSearch) {
       const q = this.filterSearch.toLowerCase();
       list = list.filter(t => t.description?.toLowerCase().includes(q));
@@ -436,7 +479,7 @@ export class TransactionsComponent implements OnInit, OnDestroy {
     this.fType = tx.type;
     this.fDescription = tx.description ?? '';
     this.fDate = tx.transactionDate;
-    this.fCategory = tx.categoryName ?? '';
+    this.fCategory = tx.categoryId ?? '';
     this.fNote = '';
     this.formError.set(null);
     this.showForm.set(true);
@@ -458,9 +501,7 @@ export class TransactionsComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const categoryId = this.fCategory
-      ? this.transactions().find(t => t.categoryName === this.fCategory)?.categoryId ?? null
-      : null;
+    const categoryId = this.fCategory || null;
 
     const req: CreateTransactionRequest = {
       amount,
@@ -477,19 +518,15 @@ export class TransactionsComponent implements OnInit, OnDestroy {
     const call = editing ? this.svc.update(editing.id, req) : this.svc.create(req);
 
     call.subscribe({
-      next: (saved) => {
-        if (editing) {
-          this.transactions.update(list => list.map(t => t.id === saved.id ? saved : t));
-        } else {
-          this.transactions.update(list => [saved, ...list]);
-        }
-        this.applyFilters();
+      next: () => {
+        this.load(); // reload fresh list so category names are up-to-date
         this.saving.set(false);
         this.closeForm();
       },
       error: () => {
         this.formError.set('Failed to save. Please check your input and try again.');
         this.saving.set(false);
+        this.cdr.markForCheck();
       },
     });
   }
@@ -538,16 +575,24 @@ export class TransactionsComponent implements OnInit, OnDestroy {
 
   applyAiSuggestion(): void {
     const s = this.aiSuggestion();
-    if (s?.categoryName) this.fCategory = s.categoryName;
+    if (!s?.categoryName) return;
+    const match = this.categories().find(c => c.name === s.categoryName);
+    if (match) this.fCategory = match.id;
   }
 
   ngOnDestroy(): void {
     clearTimeout(this.suggestTimer);
+    clearTimeout(this.bootTimer);
   }
 
-  getCategoryMeta(name: string | null): CategoryMeta {
-    return this.categories.find(c => c.name === name)
-      ?? { name: name ?? '', emoji: '📌', bg: 'rgba(148,163,184,0.12)' };
+  getCategoryMeta(name: string | null): { emoji: string; bg: string } {
+    if (!name) return { emoji: '📌', bg: 'rgba(148,163,184,0.12)' };
+    const key = Object.keys(CATEGORY_ICON_MAP).find(k => name.includes(k));
+    if (key) return CATEGORY_ICON_MAP[key];
+    // Fallback: derive bg from the category color if available
+    const cat = this.categories().find(c => c.name === name);
+    if (cat) return { emoji: '📌', bg: cat.color + '22' };
+    return { emoji: '📌', bg: 'rgba(148,163,184,0.12)' };
   }
 
   formatDate(d: string): string {

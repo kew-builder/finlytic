@@ -47,3 +47,11 @@ internal record InsightItem(
     [property: JsonPropertyName("title")] string Title,
     [property: JsonPropertyName("description")] string Description,
     [property: JsonPropertyName("amount")] decimal? Amount);
+
+internal record ForecastAiItem(
+    [property: JsonPropertyName("year")] int Year,
+    [property: JsonPropertyName("month")] int Month,
+    [property: JsonPropertyName("label")] string Label,
+    [property: JsonPropertyName("predictedIncome")] decimal PredictedIncome,
+    [property: JsonPropertyName("predictedExpenses")] decimal PredictedExpenses,
+    [property: JsonPropertyName("confidence")] int Confidence);

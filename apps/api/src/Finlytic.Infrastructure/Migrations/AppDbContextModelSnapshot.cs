@@ -57,6 +57,9 @@ namespace Finlytic.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
+                    b.HasIndex("UserId", "CategoryId")
+                        .HasDatabaseName("IX_Budgets_UserId_CategoryId");
+
                     b.ToTable("Budgets");
                 });
 
@@ -176,6 +179,9 @@ namespace Finlytic.Infrastructure.Migrations
                     b.HasIndex("UserId");
 
                     b.HasIndex("UserId", "TransactionDate");
+
+                    b.HasIndex("UserId", "Type")
+                        .HasDatabaseName("IX_Transactions_UserId_Type");
 
                     b.ToTable("Transactions");
                 });
