@@ -1,12 +1,13 @@
-import { ChangeDetectionStrategy, Component, OnInit, OnDestroy, signal, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, OnDestroy, signal, computed, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { TransactionService } from './services/transaction.service';
+import { CategoryService } from './services/category.service';
 import {
   AiSuggestion,
-  CategoryMeta,
+  CategoryDto,
+  CATEGORY_ICON_MAP,
   CreateTransactionRequest,
-  DEFAULT_CATEGORIES,
   TransactionResponse,
 } from './models/transaction.model';
 
@@ -56,8 +57,8 @@ import {
 
         <select class="filter-input" [(ngModel)]="filterCategory" (ngModelChange)="applyFilters()">
           <option value="">All Categories</option>
-          @for (c of categories; track c.name) {
-            <option [value]="c.name">{{ c.emoji }} {{ c.name }}</option>
+          @for (c of categories(); track c.id) {
+            <option [value]="c.id">{{ c.name }}</option>
           }
         </select>
 
@@ -241,8 +242,8 @@ import {
                 <label class="form-label">Category</label>
                 <select class="form-input" [(ngModel)]="fCategory">
                   <option value="">Select category…</option>
-                  @for (c of categories; track c.name) {
-                    <option [value]="c.name">{{ c.emoji }} {{ c.name }}</option>
+                  @for (c of categories(); track c.id) {
+                    <option [value]="c.id">{{ c.name }}</option>
                   }
                 </select>
               </div>
@@ -301,9 +302,11 @@ import {
 })
 export class TransactionsComponent implements OnInit, OnDestroy {
   private svc = inject(TransactionService);
+  private categorySvc = inject(CategoryService);
+  private cdr = inject(ChangeDetectorRef);
 
   readonly currentPeriodLabel = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-  readonly categories = DEFAULT_CATEGORIES;
+  categories = signal<CategoryDto[]>([]);
   readonly typeOptions = [
     { value: '',        label: 'All' },
     { value: 'Income',  label: 'Income' },
@@ -370,6 +373,13 @@ export class TransactionsComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.load();
+    this.loadCategories();
+  }
+
+  private loadCategories(): void {
+    this.categorySvc.getAll().subscribe({
+      next: (cats) => this.categories.set(cats),
+    });
   }
 
   load(): void {
@@ -393,7 +403,7 @@ export class TransactionsComponent implements OnInit, OnDestroy {
     if (this.filterType) list = list.filter(t => t.type === this.filterType);
     if (this.filterStart) list = list.filter(t => t.transactionDate >= this.filterStart);
     if (this.filterEnd)   list = list.filter(t => t.transactionDate <= this.filterEnd);
-    if (this.filterCategory) list = list.filter(t => t.categoryName === this.filterCategory);
+    if (this.filterCategory) list = list.filter(t => t.categoryId === this.filterCategory);
     if (this.filterSearch) {
       const q = this.filterSearch.toLowerCase();
       list = list.filter(t => t.description?.toLowerCase().includes(q));
@@ -436,7 +446,7 @@ export class TransactionsComponent implements OnInit, OnDestroy {
     this.fType = tx.type;
     this.fDescription = tx.description ?? '';
     this.fDate = tx.transactionDate;
-    this.fCategory = tx.categoryName ?? '';
+    this.fCategory = tx.categoryId ?? '';
     this.fNote = '';
     this.formError.set(null);
     this.showForm.set(true);
@@ -458,9 +468,7 @@ export class TransactionsComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const categoryId = this.fCategory
-      ? this.transactions().find(t => t.categoryName === this.fCategory)?.categoryId ?? null
-      : null;
+    const categoryId = this.fCategory || null;
 
     const req: CreateTransactionRequest = {
       amount,
@@ -477,19 +485,15 @@ export class TransactionsComponent implements OnInit, OnDestroy {
     const call = editing ? this.svc.update(editing.id, req) : this.svc.create(req);
 
     call.subscribe({
-      next: (saved) => {
-        if (editing) {
-          this.transactions.update(list => list.map(t => t.id === saved.id ? saved : t));
-        } else {
-          this.transactions.update(list => [saved, ...list]);
-        }
-        this.applyFilters();
+      next: () => {
+        this.load(); // reload fresh list so category names are up-to-date
         this.saving.set(false);
         this.closeForm();
       },
       error: () => {
         this.formError.set('Failed to save. Please check your input and try again.');
         this.saving.set(false);
+        this.cdr.markForCheck();
       },
     });
   }
@@ -538,16 +542,23 @@ export class TransactionsComponent implements OnInit, OnDestroy {
 
   applyAiSuggestion(): void {
     const s = this.aiSuggestion();
-    if (s?.categoryName) this.fCategory = s.categoryName;
+    if (!s?.categoryName) return;
+    const match = this.categories().find(c => c.name === s.categoryName);
+    if (match) this.fCategory = match.id;
   }
 
   ngOnDestroy(): void {
     clearTimeout(this.suggestTimer);
   }
 
-  getCategoryMeta(name: string | null): CategoryMeta {
-    return this.categories.find(c => c.name === name)
-      ?? { name: name ?? '', emoji: '📌', bg: 'rgba(148,163,184,0.12)' };
+  getCategoryMeta(name: string | null): { emoji: string; bg: string } {
+    if (!name) return { emoji: '📌', bg: 'rgba(148,163,184,0.12)' };
+    const key = Object.keys(CATEGORY_ICON_MAP).find(k => name.includes(k));
+    if (key) return CATEGORY_ICON_MAP[key];
+    // Fallback: derive bg from the category color if available
+    const cat = this.categories().find(c => c.name === name);
+    if (cat) return { emoji: '📌', bg: cat.color + '22' };
+    return { emoji: '📌', bg: 'rgba(148,163,184,0.12)' };
   }
 
   formatDate(d: string): string {
