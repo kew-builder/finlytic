@@ -81,7 +81,7 @@ builder.Services.AddHttpClient("Gemini", client =>
     .HandleTransientHttpError()
     .WaitAndRetryAsync(
         retryCount: 3,
-        sleepDurationProvider: attempt => TimeSpan.FromSeconds(Math.Pow(2, attempt)),
+        sleepDurationProvider: attempt => TimeSpan.FromSeconds(attempt * 20), // 20s, 40s, 60s
         onRetry: (outcome, delay, attempt, _) =>
             Log.Warning("Gemini retry {Attempt}/3 after {Delay}s — {Reason}",
                 attempt, delay.TotalSeconds,
@@ -90,7 +90,7 @@ builder.Services.AddHttpClient("Gemini", client =>
     .HandleTransientHttpError()
     .CircuitBreakerAsync(
         handledEventsAllowedBeforeBreaking: 5,
-        durationOfBreak: TimeSpan.FromSeconds(30),
+        durationOfBreak: TimeSpan.FromSeconds(60),
         onBreak: (_, duration) => Log.Warning("Gemini circuit breaker OPEN for {Duration}s", duration.TotalSeconds),
         onReset: () => Log.Information("Gemini circuit breaker CLOSED — resuming")));
 
@@ -110,6 +110,11 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+
+    using var scope = app.Services.CreateScope();
+    await DataSeeder.SeedDemoAsync(
+        scope.ServiceProvider,
+        scope.ServiceProvider.GetRequiredService<ILogger<Program>>());
 }
 
 app.UseCors("Dev");

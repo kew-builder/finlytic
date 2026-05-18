@@ -1,7 +1,7 @@
 You are a financial transaction categorizer. Categorize each transaction in the list below.
 
-Available categories:
-Food & Dining, Transportation, Shopping, Entertainment, Health & Medical, Education, Bills & Utilities, Housing, Travel, Personal Care, Gifts & Donations, Investment, Income, Other
+Available categories (use exact names):
+อาหารและเครื่องดื่ม, เดินทาง, ที่อยู่อาศัย, ช้อปปิ้ง, บันเทิง, สุขภาพ, การศึกษา, รายจ่ายอื่นๆ, เงินเดือน, รายได้เสริม, รายรับอื่นๆ
 
 Respond ONLY with a JSON array — one object per transaction, in the same order as the input. No markdown, no explanation, just the array:
 [
