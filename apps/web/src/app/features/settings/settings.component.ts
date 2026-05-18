@@ -1,4 +1,4 @@
-import {
+﻿import {
   ChangeDetectionStrategy,
   Component,
   signal,
@@ -117,7 +117,7 @@ const DEFAULT_CATEGORIES: Category[] = [
                   <div class="pref-sub">Used for displaying amounts</div>
                 </div>
                 <select class="form-input" style="width:120px" [(ngModel)]="currency">
-                  <option value="THB">฿ THB</option>
+                  <option value="THB">&#x0E3F; THB</option>
                   <option value="USD">$ USD</option>
                   <option value="EUR">€ EUR</option>
                 </select>

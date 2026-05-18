@@ -1,4 +1,4 @@
-import {
+﻿import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
@@ -53,15 +53,15 @@ import { BudgetResponse, CreateBudgetRequest } from './models/budget.model';
           <div class="budget-ring-stats">
             <div class="budget-ring-stat">
               <span class="budget-ring-stat-label">Total Budget</span>
-              <span class="budget-ring-stat-val">฿{{ totalBudget().toLocaleString() }}</span>
+              <span class="budget-ring-stat-val">&#x0E3F;{{ totalBudget().toLocaleString() }}</span>
             </div>
             <div class="budget-ring-stat">
               <span class="budget-ring-stat-label">Total Spent</span>
-              <span class="budget-ring-stat-val" [style.color]="ringColor()">฿{{ totalSpent().toLocaleString() }}</span>
+              <span class="budget-ring-stat-val" [style.color]="ringColor()">&#x0E3F;{{ totalSpent().toLocaleString() }}</span>
             </div>
             <div class="budget-ring-stat">
               <span class="budget-ring-stat-label">Remaining</span>
-              <span class="budget-ring-stat-val" style="color:var(--teal)">฿{{ remaining().toLocaleString() }}</span>
+              <span class="budget-ring-stat-val" style="color:var(--teal)">&#x0E3F;{{ remaining().toLocaleString() }}</span>
             </div>
           </div>
         </div>
@@ -97,7 +97,7 @@ import { BudgetResponse, CreateBudgetRequest } from './models/budget.model';
               </div>
 
               <div class="budget-amounts">
-                <span class="budget-spent">฿{{ b.amount.toLocaleString() }}</span>
+                <span class="budget-spent">&#x0E3F;{{ b.amount.toLocaleString() }}</span>
                 <span class="budget-period">/ {{ b.period }}</span>
               </div>
 
@@ -159,7 +159,7 @@ import { BudgetResponse, CreateBudgetRequest } from './models/budget.model';
             </div>
 
             <div class="form-group">
-              <label class="form-label">Monthly Limit (฿)</label>
+              <label class="form-label">Monthly Limit (&#x0E3F;)</label>
               <input class="form-input" type="number" min="1" [(ngModel)]="form.amount" placeholder="e.g. 5000" />
             </div>
 

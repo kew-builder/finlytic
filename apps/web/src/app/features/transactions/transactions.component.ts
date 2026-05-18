@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, OnDestroy, signal, computed, inject } from '@angular/core';
+﻿import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, OnDestroy, signal, computed, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { TransactionService } from './services/transaction.service';
@@ -17,7 +17,7 @@ import {
   imports: [FormsModule, RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <!-- Splash screen — shown on initial load, fades out after 900ms -->
+    <!-- Splash screen &#x2014; shown on initial load, fades out after 900ms -->
     <div class="splash" [class.hidden]="!bootLoading()">
       <div class="splash-logo">
         <div class="logo-mark">F</div>
@@ -33,8 +33,8 @@ import {
       <div class="tx-page-header">
         <h1 class="tx-page-title">Transactions</h1>
         <div class="tx-header-actions">
-          <a routerLink="/import" class="btn-ghost">📄 Import CSV</a>
-          <button class="btn-primary" (click)="openAdd()">＋ Add Transaction</button>
+          <a routerLink="/import" class="btn-ghost">&#x1F4C4; Import CSV</a>
+          <button class="btn-primary" (click)="openAdd()">+ Add Transaction</button>
         </div>
       </div>
 
@@ -79,7 +79,7 @@ import {
           }
         </div>
 
-        <input class="filter-input filter-search" placeholder="Search description…"
+        <input class="filter-input filter-search" placeholder="Search description..."
           [(ngModel)]="filterSearch" (ngModelChange)="applyFilters()" />
 
         <select class="filter-input" [(ngModel)]="filterSort" (ngModelChange)="applyFilters()">
@@ -130,7 +130,7 @@ import {
                 <tr>
                   <td colspan="6">
                     <div class="tx-empty">
-                      <div class="tx-empty-icon">📋</div>
+                      <div class="tx-empty-icon">&#x1F4CB;</div>
                       <div class="tx-empty-title">No transactions found</div>
                       <div class="tx-empty-sub">
                         {{ transactions().length === 0 ? 'Click "+ Add Transaction" to get started' : 'Try adjusting your filters' }}
@@ -148,19 +148,19 @@ import {
                           {{ getCategoryMeta(tx.categoryName).emoji }}
                         </div>
                         <div class="tx-desc-text">
-                          <span class="tx-desc-main">{{ tx.description || '—' }}</span>
+                          <span class="tx-desc-main">{{ tx.description || '\u2014' }}</span>
                           @if (tx.aiCategorized) {
                             <span class="badge-ai">AI</span>
                           }
                         </div>
                       </div>
                     </td>
-                    <td class="tx-td-muted" style="font-size:13px">{{ tx.categoryName || '—' }}</td>
+                    <td class="tx-td-muted" style="font-size:13px">{{ tx.categoryName || '\u2014' }}</td>
                     <td>
                       <span class="badge"
                         [class.badge-income]="tx.type === 'Income'"
                         [class.badge-expense]="tx.type === 'Expense'">
-                        {{ tx.type === 'Income' ? '↑ Income' : '↓ Expense' }}
+                        {{ tx.type === 'Income' ? '\u2191 Income' : '\u2193 Expense' }}
                       </span>
                     </td>
                     <td class="tx-th-amount">
@@ -170,8 +170,8 @@ import {
                     </td>
                     <td>
                       <div class="row-actions">
-                        <button class="row-action-btn" (click)="openEdit(tx)" title="Edit">✎</button>
-                        <button class="row-action-btn danger" (click)="openDelete(tx)" title="Delete">🗑</button>
+                        <button class="row-action-btn" (click)="openEdit(tx)" title="Edit">&#x270E;</button>
+                        <button class="row-action-btn danger" (click)="openDelete(tx)" title="Delete">&#x1F5D1;</button>
                       </div>
                     </td>
                   </tr>
@@ -184,17 +184,17 @@ import {
           @if (!loading() && totalPages() > 1) {
             <div class="pagination-bar">
               <div class="pagination-info">
-                Showing {{ showingFrom() }}–{{ showingTo() }} of {{ filtered().length }} transactions
+                Showing {{ showingFrom() }}&#x2013;{{ showingTo() }} of {{ filtered().length }} transactions
               </div>
               <div class="pagination-btns">
                 <button class="page-btn page-nav" [disabled]="page() <= 1"
-                  (click)="prevPage()">‹ Prev</button>
+                  (click)="prevPage()">&lsaquo; Prev</button>
                 @for (p of pageNumbers(); track p) {
                   <button class="page-btn" [class.active]="page() === p"
                     (click)="page.set(p)">{{ p }}</button>
                 }
                 <button class="page-btn page-nav" [disabled]="page() >= totalPages()"
-                  (click)="nextPage()">Next ›</button>
+                  (click)="nextPage()">Next &rsaquo;</button>
               </div>
             </div>
           }
@@ -208,7 +208,7 @@ import {
 
             <div class="modal-header">
               <div class="modal-title">{{ editingTx() ? 'Edit Transaction' : 'Add Transaction' }}</div>
-              <button class="modal-close" (click)="closeForm()">✕</button>
+              <button class="modal-close" (click)="closeForm()">&#x2715;</button>
             </div>
 
             @if (formError()) {
@@ -223,18 +223,18 @@ import {
                 <div class="type-toggle">
                   <button class="type-btn" type="button"
                     [class.active-expense]="fType === 'Expense'"
-                    (click)="fType = 'Expense'">↓ Expense</button>
+                    (click)="fType = 'Expense'">&#x2193; Expense</button>
                   <button class="type-btn" type="button"
                     [class.active-income]="fType === 'Income'"
-                    (click)="fType = 'Income'">↑ Income</button>
+                    (click)="fType = 'Income'">&#x2191; Income</button>
                 </div>
               </div>
 
-              <!-- Amount — large -->
+              <!-- Amount &#x2014; large -->
               <div class="form-group">
                 <label class="form-label">Amount *</label>
                 <div class="amount-input-row" [class.income]="fType === 'Income'" [class.expense]="fType === 'Expense'">
-                  <span class="amount-prefix">฿</span>
+                  <span class="amount-prefix">&#x0E3F;</span>
                   <input type="number" min="0.01" step="0.01"
                     [(ngModel)]="fAmount" placeholder="0.00" />
                 </div>
@@ -246,14 +246,14 @@ import {
                 <input class="form-input" type="text" maxlength="500"
                   [(ngModel)]="fDescription"
                   (ngModelChange)="onDescriptionChange($event)"
-                  placeholder="e.g. Lunch at MK Restaurant, Monthly Salary…" />
+                  placeholder="e.g. Lunch at MK Restaurant, Monthly Salary..." />
                 @if (suggestingCategory()) {
-                  <div class="ai-hint">✨ Thinking…</div>
+                  <div class="ai-hint">&#x2728; Thinking...</div>
                 }
                 @if (aiSuggestion() && !suggestingCategory()) {
                   <div class="ai-suggestion">
                     <span class="ai-suggestion-label">
-                      ✨ Suggested: <strong>{{ aiSuggestion()!.categoryName }}</strong>
+                      &#x2728; Suggested: <strong>{{ aiSuggestion()!.categoryName }}</strong>
                       <span class="ai-confidence">({{ aiSuggestion()!.confidence }}%)</span>
                     </span>
                     <button type="button" class="ai-apply-btn" (click)="applyAiSuggestion()">Apply</button>
@@ -265,7 +265,7 @@ import {
               <div class="form-group">
                 <label class="form-label">Category</label>
                 <select class="form-input" [(ngModel)]="fCategory">
-                  <option value="">Select category…</option>
+                  <option value="">Select category...</option>
                   @for (c of categories(); track c.id) {
                     <option [value]="c.id">{{ c.name }}</option>
                   }
@@ -282,7 +282,7 @@ import {
               <div class="form-group">
                 <label class="form-label">Note <span class="form-label-opt">(optional)</span></label>
                 <textarea class="form-input form-textarea" [(ngModel)]="fNote"
-                  placeholder="Add a note…" rows="2"></textarea>
+                  placeholder="Add a note..." rows="2"></textarea>
               </div>
 
             </div>
@@ -290,7 +290,7 @@ import {
             <div class="modal-footer">
               <button class="btn-ghost" (click)="closeForm()" [disabled]="saving()">Cancel</button>
               <button class="btn-primary" (click)="save()" [disabled]="saving()">
-                {{ saving() ? 'Saving…' : (editingTx() ? 'Save Changes' : 'Save Transaction') }}
+                {{ saving() ? 'Saving...' : (editingTx() ? 'Save Changes' : 'Save Transaction') }}
               </button>
             </div>
 
@@ -304,12 +304,12 @@ import {
           <div class="modal-box modal-sm" (click)="$event.stopPropagation()">
             <div class="modal-header">
               <div class="modal-title">Delete Transaction</div>
-              <button class="modal-close" (click)="closeDelete()">✕</button>
+              <button class="modal-close" (click)="closeDelete()">&#x2715;</button>
             </div>
             <div class="modal-body">
               <p class="confirm-text">
                 Are you sure you want to delete
-                <strong>{{ deletingTx()!.description ?? ('฿' + deletingTx()!.amount) }}</strong>?
+                <strong>{{ deletingTx()!.description ?? ('\u0E3F' + deletingTx()!.amount) }}</strong>?
                 This action cannot be undone.
               </p>
             </div>
@@ -570,7 +570,7 @@ export class TransactionsComponent implements OnInit, OnDestroy {
         },
         error: () => this.suggestingCategory.set(false),
       });
-    }, 600);
+    }, 1500);
   }
 
   applyAiSuggestion(): void {
@@ -586,13 +586,13 @@ export class TransactionsComponent implements OnInit, OnDestroy {
   }
 
   getCategoryMeta(name: string | null): { emoji: string; bg: string } {
-    if (!name) return { emoji: '📌', bg: 'rgba(148,163,184,0.12)' };
+    if (!name) return { emoji: '\u{1F4CC}', bg: 'rgba(148,163,184,0.12)' };
     const key = Object.keys(CATEGORY_ICON_MAP).find(k => name.includes(k));
     if (key) return CATEGORY_ICON_MAP[key];
     // Fallback: derive bg from the category color if available
     const cat = this.categories().find(c => c.name === name);
-    if (cat) return { emoji: '📌', bg: cat.color + '22' };
-    return { emoji: '📌', bg: 'rgba(148,163,184,0.12)' };
+    if (cat) return { emoji: '\u{1F4CC}', bg: cat.color + '22' };
+    return { emoji: '\u{1F4CC}', bg: 'rgba(148,163,184,0.12)' };
   }
 
   formatDate(d: string): string {
@@ -602,6 +602,6 @@ export class TransactionsComponent implements OnInit, OnDestroy {
   }
 
   formatAmount(n: number): string {
-    return `฿${n.toLocaleString('en-US', { maximumFractionDigits: 2 })}`;
+    return `\u0E3F${n.toLocaleString('en-US', { maximumFractionDigits: 2 })}`;
   }
 }

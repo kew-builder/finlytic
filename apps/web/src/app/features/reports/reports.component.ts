@@ -1,4 +1,4 @@
-import {
+﻿import {
   AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -229,7 +229,7 @@ const MOCK: Record<Period, {
                   <div class="cat-bar-track">
                     <div class="cat-bar-fill" [style.width.%]="cat.pct" [style.background]="cat.color"></div>
                   </div>
-                  <span class="cat-bar-amt">฿{{ formatK(cat.amount) }}</span>
+                  <span class="cat-bar-amt">&#x0E3F;{{ formatK(cat.amount) }}</span>
                   <span class="cat-bar-pct">{{ cat.pct }}%</span>
                 </div>
               }
@@ -275,7 +275,7 @@ const MOCK: Record<Period, {
                     <div class="rank-name">{{ item.name }}</div>
                     <div class="rank-cat">{{ item.category }}</div>
                   </div>
-                  <span class="rank-amt">-฿{{ item.amount.toLocaleString() }}</span>
+                  <span class="rank-amt">-&#x0E3F;{{ item.amount.toLocaleString() }}</span>
                 </div>
               }
             </div>
@@ -302,8 +302,8 @@ const MOCK: Record<Period, {
                 } @else {
                   <div class="heatmap-cell"
                     [style.background]="heatColor(cell.amount)"
-                    [title]="'May ' + cell.day + ' — ฿' + cell.amount.toLocaleString()">
-                    <span class="heatmap-tooltip">May {{ cell.day }} — ฿{{ cell.amount.toLocaleString() }}</span>
+                    [title]="'May ' + cell.day + ' — \u0E3F' + cell.amount.toLocaleString()">
+                    <span class="heatmap-tooltip">May {{ cell.day }} — &#x0E3F;{{ cell.amount.toLocaleString() }}</span>
                   </div>
                 }
               }
@@ -382,7 +382,7 @@ export class ReportsComponent implements OnDestroy {
 
   readonly aiInsights = [
     { color: 'var(--coral)', text: 'Food & Dining spending increased 16% vs last month. Consider meal prepping to cut costs.' },
-    { color: 'var(--amber)', text: 'You\'ve spent ฿14,200 in week 3 alone — your highest single-week spend this month.' },
+    { color: 'var(--amber)', text: 'You\'ve spent \u0E3F14,200 in week 3 alone — your highest single-week spend this month.' },
     { color: 'var(--teal)',  text: 'Transport costs are steady. At this rate you\'ll finish the month 12% under transport budget.' },
   ];
 
@@ -504,7 +504,7 @@ export class ReportsComponent implements OnDestroy {
           titleColor: '#e8e8f0',
           bodyColor: 'rgba(232,232,240,0.7)',
           callbacks: {
-            label: (ctx: any) => ` ฿${Number(ctx.raw).toLocaleString()}`,
+            label: (ctx: any) => ` \u0E3F${Number(ctx.raw).toLocaleString()}`,
           },
         },
       },

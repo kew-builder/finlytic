@@ -1,4 +1,4 @@
-import {
+﻿import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
@@ -242,7 +242,7 @@ import { AiInsight, TransactionResponse } from '../transactions/models/transacti
                     <div class="insight-title">{{ insightIcon(insight.type) }} {{ insight.title }}</div>
                     <div class="insight-text">{{ insight.description }}</div>
                     @if (insight.amount) {
-                      <div class="insight-amount">฿{{ insight.amount.toLocaleString() }}</div>
+                      <div class="insight-amount">&#x0E3F;{{ insight.amount.toLocaleString() }}</div>
                     }
                   </div>
                 </div>
@@ -444,11 +444,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
         interaction: { mode: 'index', intersect: false },
         plugins: {
           legend: { display: false },
-          tooltip: { backgroundColor: '#1a1a35', borderColor: 'rgba(255,255,255,0.12)', borderWidth: 1, titleColor: '#fff', bodyColor: 'rgba(232,232,240,0.75)', padding: 10, callbacks: { label: (c) => ` ${c.dataset.label}: ฿${(c.parsed.y ?? 0).toLocaleString()}` } },
+          tooltip: { backgroundColor: '#1a1a35', borderColor: 'rgba(255,255,255,0.12)', borderWidth: 1, titleColor: '#fff', bodyColor: 'rgba(232,232,240,0.75)', padding: 10, callbacks: { label: (c) => ` ${c.dataset.label}: \u0E3F${(c.parsed.y ?? 0).toLocaleString()}` } },
         },
         scales: {
           x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'rgba(232,232,240,0.45)', font: { family: 'Outfit', size: 11 } } },
-          y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'rgba(232,232,240,0.45)', font: { family: 'Outfit', size: 11 }, callback: (v) => `฿${(Number(v) / 1000).toFixed(0)}k` } },
+          y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'rgba(232,232,240,0.45)', font: { family: 'Outfit', size: 11 }, callback: (v) => `\u0E3F${(Number(v) / 1000).toFixed(0)}k` } },
         },
       },
     });
@@ -477,7 +477,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         responsive: false, maintainAspectRatio: false, cutout: '68%',
         plugins: {
           legend: { display: false },
-          tooltip: { backgroundColor: '#1a1a35', borderColor: 'rgba(255,255,255,0.12)', borderWidth: 1, titleColor: '#fff', bodyColor: 'rgba(232,232,240,0.75)', padding: 10, callbacks: { label: (c) => ` ฿${(c.raw as number).toLocaleString()} (${cats[c.dataIndex]?.percentage ?? 0}%)` } },
+          tooltip: { backgroundColor: '#1a1a35', borderColor: 'rgba(255,255,255,0.12)', borderWidth: 1, titleColor: '#fff', bodyColor: 'rgba(232,232,240,0.75)', padding: 10, callbacks: { label: (c) => ` \u0E3F${(c.raw as number).toLocaleString()} (${cats[c.dataIndex]?.percentage ?? 0}%)` } },
         },
       },
     });
@@ -509,11 +509,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
         responsive: true, maintainAspectRatio: false,
         plugins: {
           legend: { display: false },
-          tooltip: { backgroundColor: '#1a1a35', borderColor: 'rgba(255,255,255,0.12)', borderWidth: 1, titleColor: '#fff', bodyColor: 'rgba(232,232,240,0.75)', padding: 10, callbacks: { label: (c) => ` ${c.dataset.label}: ฿${(c.parsed.y ?? 0).toLocaleString()}` } },
+          tooltip: { backgroundColor: '#1a1a35', borderColor: 'rgba(255,255,255,0.12)', borderWidth: 1, titleColor: '#fff', bodyColor: 'rgba(232,232,240,0.75)', padding: 10, callbacks: { label: (c) => ` ${c.dataset.label}: \u0E3F${(c.parsed.y ?? 0).toLocaleString()}` } },
         },
         scales: {
           x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'rgba(232,232,240,0.45)', font: { family: 'Outfit', size: 11 } } },
-          y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'rgba(232,232,240,0.45)', font: { family: 'Outfit', size: 11 }, callback: (v) => `฿${(Number(v) / 1000).toFixed(0)}k` } },
+          y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'rgba(232,232,240,0.45)', font: { family: 'Outfit', size: 11 }, callback: (v) => `\u0E3F${(Number(v) / 1000).toFixed(0)}k` } },
         },
       },
     });
@@ -536,24 +536,24 @@ export class DashboardComponent implements OnInit, OnDestroy {
         responsive: true, maintainAspectRatio: false,
         plugins: {
           legend: { display: false },
-          tooltip: { backgroundColor: '#1a1a35', borderColor: 'rgba(255,255,255,0.12)', borderWidth: 1, titleColor: '#fff', bodyColor: 'rgba(232,232,240,0.75)', padding: 10, callbacks: { label: (c) => ` ${c.dataset.label}: ฿${(c.parsed.y ?? 0).toLocaleString()}`, afterLabel: (c) => `  Confidence: ${fc[c.dataIndex]?.confidence ?? '?'}%` } },
+          tooltip: { backgroundColor: '#1a1a35', borderColor: 'rgba(255,255,255,0.12)', borderWidth: 1, titleColor: '#fff', bodyColor: 'rgba(232,232,240,0.75)', padding: 10, callbacks: { label: (c) => ` ${c.dataset.label}: \u0E3F${(c.parsed.y ?? 0).toLocaleString()}`, afterLabel: (c) => `  Confidence: ${fc[c.dataIndex]?.confidence ?? '?'}%` } },
         },
         scales: {
           x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'rgba(232,232,240,0.45)', font: { family: 'Outfit', size: 11 } } },
-          y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'rgba(232,232,240,0.45)', font: { family: 'Outfit', size: 11 }, callback: (v) => `฿${(Number(v) / 1000).toFixed(0)}k` } },
+          y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'rgba(232,232,240,0.45)', font: { family: 'Outfit', size: 11 }, callback: (v) => `\u0E3F${(Number(v) / 1000).toFixed(0)}k` } },
         },
       },
     });
   }
 
   fmt(n: number): string {
-    return `฿${Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    return `\u0E3F${Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   }
 
   fmtShort(n: number): string {
     const abs = Math.abs(n);
-    if (abs >= 1000) return `฿${(abs / 1000).toFixed(1).replace(/\.0$/, '')}k`;
-    return `฿${abs.toLocaleString()}`;
+    if (abs >= 1000) return `\u0E3F${(abs / 1000).toFixed(1).replace(/\.0$/, '')}k`;
+    return `\u0E3F${abs.toLocaleString()}`;
   }
 
   insightIcon(type: AiInsight['type']): string {

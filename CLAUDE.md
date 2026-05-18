@@ -163,6 +163,7 @@ src/app/
 - Smart/dumb component split: container components fetch data, presentational components receive inputs
 - No business logic in components — services handle that
 - Strong typing: avoid `any`; use proper interfaces
+- **Non-ASCII in inline templates**: Angular 19 + esbuild on Windows reads `.ts` files without explicit UTF-8, causing non-ASCII chars in TypeScript template literals to corrupt in the bundle output. **Rule: never paste non-ASCII characters directly into TypeScript template strings.** Use `\uXXXX` for TypeScript expression contexts (inside `{{ }}`, string literals, method returns) and `&#xXXXX;` for Angular HTML text nodes. Thai text in *separate* `.html` files is fine — Angular's HTML compiler handles it directly.
 
 ### TypeScript
 
