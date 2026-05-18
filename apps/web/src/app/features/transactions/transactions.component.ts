@@ -17,6 +17,16 @@ import {
   imports: [FormsModule, RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
+    <!-- Splash screen — shown on initial load, fades out after 900ms -->
+    <div class="splash" [class.hidden]="!bootLoading()">
+      <div class="splash-logo">
+        <div class="logo-mark">F</div>
+        <div class="logo-text">Finlytic</div>
+      </div>
+      <div class="splash-progress"></div>
+      <div class="splash-hint">Loading your finances...</div>
+    </div>
+
     <div class="tx-page">
 
       <!-- Page header -->
@@ -329,6 +339,10 @@ export class TransactionsComponent implements OnInit, OnDestroy {
   readonly perPage = 10;
   readonly skeletonRows = [1,2,3,4,5,6,7,8];
 
+  // Splash: shown on first load only, fades out after 900ms
+  bootLoading = signal(true);
+  private bootTimer?: ReturnType<typeof setTimeout>;
+
   // Data
   transactions = signal<TransactionResponse[]>([]);
   loading = signal(false);
@@ -387,6 +401,10 @@ export class TransactionsComponent implements OnInit, OnDestroy {
   absNet = computed(() => Math.abs(this.netAmount()));
 
   ngOnInit(): void {
+    this.bootTimer = setTimeout(() => {
+      this.bootLoading.set(false);
+      this.cdr.markForCheck();
+    }, 900);
     this.load();
     this.loadCategories();
   }
@@ -564,6 +582,7 @@ export class TransactionsComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     clearTimeout(this.suggestTimer);
+    clearTimeout(this.bootTimer);
   }
 
   getCategoryMeta(name: string | null): { emoji: string; bg: string } {
