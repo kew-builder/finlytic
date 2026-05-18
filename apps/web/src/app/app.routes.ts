@@ -17,6 +17,8 @@ export const routes: Routes = [
     loadComponent: () => import('./layout/layout.component').then(m => m.LayoutComponent),
     children: [
       { path: 'dashboard', loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent) },
+      { path: 'transactions', loadComponent: () => import('./features/transactions/transactions.component').then(m => m.TransactionsComponent) },
+      { path: 'import', loadComponent: () => import('./features/import/import.component').then(m => m.ImportComponent) },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
     ],
   },

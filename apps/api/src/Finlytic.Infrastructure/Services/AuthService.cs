@@ -1,6 +1,7 @@
 using Finlytic.Application.Common.DTOs.Auth;
 using Finlytic.Application.Common.Interfaces;
 using Finlytic.Domain.Entities;
+using Finlytic.Domain.Enums;
 using Finlytic.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -25,6 +26,8 @@ public sealed class AuthService(
 
         db.Users.Add(user);
         await db.SaveChangesAsync(ct);
+
+        await SeedDefaultCategoriesAsync(user.Id, ct);
 
         logger.LogInformation("User registered: {UserId}", user.Id);
 
@@ -57,6 +60,27 @@ public sealed class AuthService(
         await db.SaveChangesAsync(ct);
 
         return await IssueTokensAsync(token.User, ct);
+    }
+
+    private async Task SeedDefaultCategoriesAsync(Guid userId, CancellationToken ct)
+    {
+        var defaults = new[]
+        {
+            Category.Create(userId, "อาหารและเครื่องดื่ม", TransactionType.Expense, "#F97316", isDefault: true),
+            Category.Create(userId, "เดินทาง",             TransactionType.Expense, "#3B82F6", isDefault: true),
+            Category.Create(userId, "ที่อยู่อาศัย",        TransactionType.Expense, "#8B5CF6", isDefault: true),
+            Category.Create(userId, "ช้อปปิ้ง",            TransactionType.Expense, "#EC4899", isDefault: true),
+            Category.Create(userId, "บันเทิง",             TransactionType.Expense, "#F59E0B", isDefault: true),
+            Category.Create(userId, "สุขภาพ",              TransactionType.Expense, "#10B981", isDefault: true),
+            Category.Create(userId, "การศึกษา",            TransactionType.Expense, "#6366F1", isDefault: true),
+            Category.Create(userId, "รายจ่ายอื่นๆ",         TransactionType.Expense, "#6B7280", isDefault: true),
+            Category.Create(userId, "เงินเดือน",           TransactionType.Income,  "#22C55E", isDefault: true),
+            Category.Create(userId, "รายได้เสริม",         TransactionType.Income,  "#84CC16", isDefault: true),
+            Category.Create(userId, "รายรับอื่นๆ",          TransactionType.Income,  "#6B7280", isDefault: true),
+        };
+
+        db.Categories.AddRange(defaults);
+        await db.SaveChangesAsync(ct);
     }
 
     private async Task<AuthResponse> IssueTokensAsync(User user, CancellationToken ct)
