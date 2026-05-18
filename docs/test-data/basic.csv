@@ -1,0 +1,9 @@
+date,description,amount,type
+2026-05-01,Salary May,50000.00,income
+2026-05-02,Coffee Cafe Amazon,85.00,expense
+2026-05-03,Grab to office,220.50,expense
+2026-05-05,Freelance payment,8000.00,income
+2026-05-10,Supermarket Big C,1245.75,expense
+2026-05-12,Netflix subscription,279.00,expense
+2026-05-15,ATM withdrawal fee,20.00,expense
+2026-05-17,Transfer from friend,500.00,income

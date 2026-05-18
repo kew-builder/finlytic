@@ -1,0 +1,8 @@
+date,description,amount,type
+17/05/2026,"Dinner, KFC",320.00,expense
+01/05/2026,Salary bonus,"10,000.00",income
+15/05/2026,Short desc,50.00,expense
+2026-05-10,Amount with trailing zeros,100.50000,expense
+05-01-2026,Dash date format income,25000.00,income
+2026-05-08,INCOME uppercase type,5000.00,INCOME
+2026-05-09,EXPENSE uppercase type,999.00,EXPENSE
