@@ -19,6 +19,7 @@ export const routes: Routes = [
       { path: 'dashboard', loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent) },
       { path: 'transactions', loadComponent: () => import('./features/transactions/transactions.component').then(m => m.TransactionsComponent) },
       { path: 'import', loadComponent: () => import('./features/import/import.component').then(m => m.ImportComponent) },
+      { path: 'budget', loadComponent: () => import('./features/budget/budget.component').then(m => m.BudgetComponent) },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
     ],
   },
