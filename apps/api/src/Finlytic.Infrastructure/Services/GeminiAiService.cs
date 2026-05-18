@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using Finlytic.Application.Common.DTOs.Ai;
+using Finlytic.Application.Common.DTOs.Dashboard;
 using Finlytic.Application.Common.DTOs.Transactions;
 using Finlytic.Application.Common.Interfaces;
 using Finlytic.Domain.Enums;
@@ -23,6 +24,7 @@ public sealed class GeminiAiService : IAiService
     private readonly string _categorizePrompt;
     private readonly string _categorizeBatchPrompt;
     private readonly string _insightsPrompt;
+    private readonly string _forecastPrompt;
 
     private static readonly JsonSerializerOptions JsonOpts = new() { PropertyNameCaseInsensitive = true };
 
@@ -39,6 +41,7 @@ public sealed class GeminiAiService : IAiService
         _categorizePrompt = LoadPrompt("categorize-v1.txt");
         _categorizeBatchPrompt = LoadPrompt("categorize-batch-v1.txt");
         _insightsPrompt = LoadPrompt("insights-v1.txt");
+        _forecastPrompt = LoadPrompt("forecast-v1.txt");
     }
 
     public async Task<AiCategorizationResult?> CategorizeAsync(
@@ -142,6 +145,33 @@ public sealed class GeminiAiService : IAiService
         catch (JsonException ex)
         {
             _logger.LogWarning(ex, "Failed to parse insights response. Raw: {Raw}", raw);
+            return [];
+        }
+    }
+
+    public async Task<IReadOnlyList<ForecastResponse>> GenerateForecastAsync(
+        IReadOnlyList<SpendingTrendResponse> historicalTrend, CancellationToken ct = default)
+    {
+        if (historicalTrend.Count == 0) return [];
+
+        var trendJson = JsonSerializer.Serialize(historicalTrend, JsonOpts);
+        var prompt = _forecastPrompt.Replace("{trend_json}", trendJson);
+
+        var raw = await CallGeminiAsync(prompt, maxTokens: 512, ct);
+        if (raw is null) return [];
+
+        try
+        {
+            var parsed = JsonSerializer.Deserialize<ForecastAiItem[]>(raw, JsonOpts);
+            if (parsed is null) return [];
+
+            return parsed.Select(f => new ForecastResponse(
+                f.Year, f.Month, f.Label, f.PredictedIncome, f.PredictedExpenses, f.Confidence
+            )).ToList();
+        }
+        catch (JsonException ex)
+        {
+            _logger.LogWarning(ex, "Failed to parse forecast response. Raw: {Raw}", raw);
             return [];
         }
     }

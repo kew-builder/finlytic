@@ -1,4 +1,5 @@
 using Finlytic.Application.Common.DTOs.Ai;
+using Finlytic.Application.Common.DTOs.Dashboard;
 using Finlytic.Application.Common.DTOs.Transactions;
 using Finlytic.Domain.Enums;
 
@@ -30,5 +31,13 @@ public interface IAiService
     /// </summary>
     Task<IReadOnlyList<AiInsight>> GenerateInsightsAsync(
         IReadOnlyList<TransactionResponse> transactions,
+        CancellationToken ct = default);
+
+    /// <summary>
+    /// Predicts next 3 months income/expenses from historical trend data.
+    /// Returns empty list if AI is unavailable.
+    /// </summary>
+    Task<IReadOnlyList<ForecastResponse>> GenerateForecastAsync(
+        IReadOnlyList<SpendingTrendResponse> historicalTrend,
         CancellationToken ct = default);
 }
