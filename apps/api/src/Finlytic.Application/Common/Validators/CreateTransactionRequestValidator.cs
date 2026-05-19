@@ -15,6 +15,7 @@ public sealed class CreateTransactionRequestValidator : AbstractValidator<Create
 
         RuleFor(x => x.Description)
             .MaximumLength(500).WithMessage("Description cannot exceed 500 characters.")
+            .Must(d => !d!.Contains('<')).WithMessage("Description must not contain HTML.")
             .When(x => x.Description is not null);
 
         RuleFor(x => x.TransactionDate)

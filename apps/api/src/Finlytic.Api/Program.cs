@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json.Serialization;
+using System.Threading.RateLimiting;
 using Finlytic.Application.Common.Interfaces;
 using Finlytic.Application.Common.Validators;
 using FluentValidation;
@@ -8,6 +9,7 @@ using Finlytic.Infrastructure.Persistence;
 using Finlytic.Infrastructure.Repositories;
 using Finlytic.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Polly;
@@ -98,11 +100,45 @@ builder.Services.AddControllers()
     .AddJsonOptions(opt =>
         opt.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
+builder.Services.AddRateLimiter(options =>
+{
+    // Brute-force protection on auth endpoints: 10 req / 1 min per IP
+    options.AddFixedWindowLimiter("auth-policy", opt =>
+    {
+        opt.PermitLimit = 10;
+        opt.Window = TimeSpan.FromMinutes(1);
+        opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        opt.QueueLimit = 0;
+    });
+
+    // Upload DoS protection: 5 req / 10 min per IP
+    options.AddFixedWindowLimiter("import-policy", opt =>
+    {
+        opt.PermitLimit = 5;
+        opt.Window = TimeSpan.FromMinutes(10);
+        opt.QueueLimit = 0;
+    });
+
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+});
+
 builder.Services.AddCors(options =>
+{
     options.AddPolicy("Dev", policy => policy
         .WithOrigins("http://localhost:4200")
         .AllowAnyHeader()
-        .AllowAnyMethod()));
+        .AllowAnyMethod()
+        .AllowCredentials());
+
+    // Production: origins supplied via env var CORS__ALLOWEDORIGINS (comma-separated)
+    var prodOrigins = builder.Configuration["Cors:AllowedOrigins"]
+        ?.Split(',', StringSplitOptions.RemoveEmptyEntries) ?? [];
+    options.AddPolicy("Prod", policy => policy
+        .WithOrigins(prodOrigins)
+        .WithHeaders("Content-Type", "Authorization")
+        .WithMethods("GET", "POST", "PUT", "DELETE")
+        .AllowCredentials());
+});
 
 var app = builder.Build();
 
@@ -117,7 +153,24 @@ if (app.Environment.IsDevelopment())
         scope.ServiceProvider.GetRequiredService<ILogger<Program>>());
 }
 
-app.UseCors("Dev");
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHsts();
+    app.UseHttpsRedirection();
+}
+
+// Security headers for all responses
+app.Use(async (context, next) =>
+{
+    context.Response.Headers.XContentTypeOptions = "nosniff";
+    context.Response.Headers.XFrameOptions = "DENY";
+    context.Response.Headers.XXSSProtection = "1; mode=block";
+    context.Response.Headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
+    await next();
+});
+
+app.UseCors(app.Environment.IsDevelopment() ? "Dev" : "Prod");
+app.UseRateLimiter();
 app.UseSerilogRequestLogging();
 app.UseAuthentication();
 app.UseAuthorization();

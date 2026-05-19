@@ -2,6 +2,7 @@ using Finlytic.Application.Common.DTOs.Auth;
 using Finlytic.Application.Common.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Finlytic.Api.Controllers;
 
@@ -11,6 +12,7 @@ namespace Finlytic.Api.Controllers;
 public sealed class AuthController(IAuthService authService) : ControllerBase
 {
     [HttpPost("register")]
+    [EnableRateLimiting("auth-policy")]
     public async Task<IActionResult> Register(RegisterRequest request, CancellationToken ct)
     {
         try
@@ -25,6 +27,7 @@ public sealed class AuthController(IAuthService authService) : ControllerBase
     }
 
     [HttpPost("login")]
+    [EnableRateLimiting("auth-policy")]
     public async Task<IActionResult> Login(LoginRequest request, CancellationToken ct)
     {
         try

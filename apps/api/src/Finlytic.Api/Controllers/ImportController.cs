@@ -4,6 +4,7 @@ using Finlytic.Application.Common.Interfaces;
 using Finlytic.Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Finlytic.Api.Controllers;
 
@@ -17,6 +18,7 @@ public sealed class ImportController(
     ILogger<ImportController> logger) : ControllerBase
 {
     [HttpPost("csv")]
+    [EnableRateLimiting("import-policy")]
     public IActionResult UploadCsv(IFormFile file, CancellationToken ct)
     {
         if (file is null || file.Length == 0)
