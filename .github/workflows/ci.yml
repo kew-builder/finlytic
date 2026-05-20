@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main, deployment]
+  push:
+    branches: [main]
+
+jobs:
+  build-api:
+    name: Build & Test API
+    runs-on: ubuntu-latest
+
+    # Integration tests use InMemory DB (WebAppFactory overrides EF Core)
+    # so no postgres service is needed in CI
+    env:
+      ConnectionStrings__Default: "ci-not-used-integration-tests-use-inmemory"
+      Jwt__Secret: "ci-test-jwt-secret-32-characters-minimum"
+      Jwt__Issuer: finlytic-api
+      Jwt__Audience: finlytic-app
+      Gemini__ApiKey: "ci-placeholder-not-used-in-tests"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Restore
+        run: dotnet restore
+        working-directory: apps/api
+
+      - name: Build
+        run: dotnet build --no-restore -c Release
+        working-directory: apps/api
+
+      - name: Unit Tests
+        run: dotnet test tests/Finlytic.UnitTests/Finlytic.UnitTests.csproj --no-build -c Release --logger "github-actions"
+        working-directory: apps/api
+
+      - name: Integration Tests
+        run: dotnet test tests/Finlytic.IntegrationTests/Finlytic.IntegrationTests.csproj --no-build -c Release --logger "github-actions"
+        working-directory: apps/api
+
+  build-web:
+    name: Build Angular
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: apps/web/package-lock.json
+
+      - name: Install
+        run: npm ci
+        working-directory: apps/web
+
+      - name: Build
+        run: npm run build -- --configuration=production
+        working-directory: apps/web
