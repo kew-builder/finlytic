@@ -7,7 +7,7 @@ COPY src/Finlytic.Api/Finlytic.Api.csproj src/Finlytic.Api/
 COPY src/Finlytic.Application/Finlytic.Application.csproj src/Finlytic.Application/
 COPY src/Finlytic.Domain/Finlytic.Domain.csproj src/Finlytic.Domain/
 COPY src/Finlytic.Infrastructure/Finlytic.Infrastructure.csproj src/Finlytic.Infrastructure/
-RUN dotnet restore
+RUN dotnet restore src/Finlytic.Api/Finlytic.Api.csproj
 
 COPY src/ src/
 RUN dotnet publish src/Finlytic.Api/Finlytic.Api.csproj -c Release -o /publish --no-restore
